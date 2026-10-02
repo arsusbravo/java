@@ -4,7 +4,7 @@ Travel guide and affiliate site for Java, Indonesia. The public site is Blade (`
 
 ## Project notes
 - The local MySQL database holds hand-entered data and there is no git repository. Use additive `php artisan migrate` only, never `migrate:fresh`/`db:wipe` on it. Tests use in-memory SQLite.
-- Fortify registration is disabled on purpose. The 2 failures in `tests/Feature/Auth/RegistrationTest.php` are expected, and Wayfinder generates no `register` routes.
+- Fortify registration is disabled on purpose (users are added in the admin), so there are no registration tests and Wayfinder generates no `register` routes. The whole test suite must pass: GitHub Actions (`.github/workflows/tests.yml`) fails on any failing test.
 - Admin CRUD is config-driven: each table is a class in `app/Admin/Resources`, registered in `App\Admin\Admin::RESOURCES`. It is served by `Admin\ResourceController` and the generic pages `resources/js/pages/Admin/Resources/{Index,Form}.vue`. To add a table, add a resource class instead of writing a new controller or page.
 - Images: resolve every image path with `image_url($path, 'destination'|'article'|'region'|'hero')` (`app/helpers.php`), which falls back to `public/images/placeholders/*.svg`. Models use the `HasFeaturedImage` trait (`featured_image_url`). Admin uploads live on the public disk under `uploads/`.
 - Destinations have many `DestinationType`s (`$destination->types`, pivot `destination_destination_type`), managed at `/admin/destination-types` and listed with `DestinationType::ordered()`. They're for grouping destinations by kind of trip.

@@ -6,7 +6,7 @@
     <div class="parallax-bg absolute inset-0">
         <img src="{{ image_url('images/' . $heroImage, 'hero') }}" alt="{{ $heroTitle }}" class="w-full h-full object-cover scale-110">
     </div>
-    <div class="absolute inset-0 bg-gradient-to-b from-black/65 via-black/55 to-black/75"></div>
+    <div class="absolute inset-0 bg-linear-to-b from-black/65 via-black/55 to-black/75"></div>
     
     <!-- Animated overlay patterns -->
     <div class="absolute inset-0 opacity-20">
@@ -152,11 +152,11 @@
                                              alt="{{ $article->title }}" 
                                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                                     @else
-                                        <div class="w-full h-full bg-gradient-to-br from-java-primary to-java-accent"></div>
+                                        <div class="w-full h-full bg-linear-to-br from-java-primary to-java-accent"></div>
                                     @endif
                                     
                                     <!-- Overlay Gradient -->
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                                    <div class="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent"></div>
                                     
                                     <!-- Article Type Badge -->
                                     <div class="absolute top-4 left-4">
@@ -309,7 +309,7 @@
 
                 <!-- Quick Tips (only for plan page) -->
                 @if($pageType === 'plan')
-                <div class="bg-gradient-to-br from-java-accent to-orange-600 rounded-2xl p-6 text-white shadow-lg scroll-animate opacity-0 translate-y-8" id="tips">
+                <div class="bg-linear-to-br from-java-accent to-orange-600 rounded-2xl p-6 text-white shadow-lg scroll-animate opacity-0 translate-y-8" id="tips">
                     <h3 class="font-playfair text-2xl font-bold mb-4">
                         💡 Planning Tips
                     </h3>
@@ -356,7 +356,7 @@
 </section>
 
 <!-- CTA Section -->
-<section class="py-20 bg-gradient-to-br from-java-primary via-blue-900 to-java-primary relative overflow-hidden">
+<section class="py-20 bg-linear-to-br from-java-primary via-blue-900 to-java-primary relative overflow-hidden">
     <div class="absolute inset-0 opacity-10">
         <div class="absolute top-0 left-1/4 w-96 h-96 bg-java-accent rounded-full blur-3xl animate-blob"></div>
         <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full blur-3xl animate-blob animation-delay-2000"></div>

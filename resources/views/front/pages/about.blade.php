@@ -6,7 +6,7 @@
     <div class="parallax-bg absolute inset-0">
         <img src="{{ image_url('images/about-hero.jpeg', 'hero') }}" alt="About JavaSunrise" class="w-full h-full object-cover scale-110">
     </div>
-    <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60"></div>
+    <div class="absolute inset-0 bg-linear-to-b from-black/40 via-black/30 to-black/60"></div>
     
     <!-- Animated overlay patterns -->
     <div class="absolute inset-0 opacity-20">
@@ -124,7 +124,7 @@
         <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <!-- Feature 1 -->
             <div class="text-center scroll-animate opacity-0 translate-y-8">
-                <div class="w-20 h-20 bg-gradient-to-br from-java-accent to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <div class="w-20 h-20 bg-linear-to-br from-java-accent to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                     <span class="text-4xl">📚</span>
                 </div>
                 <h3 class="font-playfair text-2xl font-bold text-gray-900 mb-4">
@@ -137,7 +137,7 @@
 
             <!-- Feature 2 -->
             <div class="text-center scroll-animate opacity-0 translate-y-8">
-                <div class="w-20 h-20 bg-gradient-to-br from-java-primary to-blue-900 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <div class="w-20 h-20 bg-linear-to-br from-java-primary to-blue-900 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                     <span class="text-4xl">🗺️</span>
                 </div>
                 <h3 class="font-playfair text-2xl font-bold text-gray-900 mb-4">
@@ -150,7 +150,7 @@
 
             <!-- Feature 3 -->
             <div class="text-center scroll-animate opacity-0 translate-y-8">
-                <div class="w-20 h-20 bg-gradient-to-br from-java-accent to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <div class="w-20 h-20 bg-linear-to-br from-java-accent to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                     <span class="text-4xl">💡</span>
                 </div>
                 <h3 class="font-playfair text-2xl font-bold text-gray-900 mb-4">
@@ -165,7 +165,7 @@
 </section>
 
 <!-- Contact CTA -->
-<section class="py-20 bg-gradient-to-br from-java-primary via-blue-900 to-java-primary relative overflow-hidden" id="contact">
+<section class="py-20 bg-linear-to-br from-java-primary via-blue-900 to-java-primary relative overflow-hidden" id="contact">
     <div class="absolute inset-0 opacity-10">
         <div class="absolute top-0 left-1/4 w-96 h-96 bg-java-accent rounded-full blur-3xl animate-blob"></div>
         <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full blur-3xl animate-blob animation-delay-2000"></div>

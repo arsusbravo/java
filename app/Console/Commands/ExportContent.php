@@ -73,7 +73,13 @@ class ExportContent extends Command
             . " && mysqldump {$connection} {$options} --no-create-info --skip-triggers {$skipRows} {$database}; }"
             . ' | gzip -9 > ' . escapeshellarg($file);
 
-        Process::env(ContentTransfer::environment($config))->timeout(600)->run(['bash', '-c', $command])->throw();
+        $result = Process::env(ContentTransfer::environment($config))->timeout(600)->run(['bash', '-c', $command]);
+
+        // Never leave a half-written dump that looks like a valid export
+        if ($result->failed()) {
+            @unlink($file);
+            $result->throw();
+        }
 
         return true;
     }

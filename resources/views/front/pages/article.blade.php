@@ -9,10 +9,10 @@
                  alt="{{ $article->title }}" 
                  class="w-full h-full object-cover scale-110">
         @else
-            <div class="w-full h-full bg-gradient-to-br from-java-primary to-java-accent"></div>
+            <div class="w-full h-full bg-linear-to-br from-java-primary to-java-accent"></div>
         @endif
     </div>
-    <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/80"></div>
+    <div class="absolute inset-0 bg-linear-to-b from-black/20 via-black/40 to-black/80"></div>
     
     <!-- Animated overlay patterns -->
     <div class="absolute inset-0 opacity-10">
@@ -143,7 +143,7 @@
 
                     <!-- Related Accommodations -->
                     @if($article->accommodations && $article->accommodations->count() > 0)
-                    <div class="not-prose mt-12 p-8 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl">
+                    <div class="not-prose mt-12 p-8 bg-linear-to-br from-blue-50 to-blue-100 rounded-2xl">
                         <h3 class="font-playfair text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                             🏨 <span>Recommended Accommodations</span>
                         </h3>
@@ -160,7 +160,7 @@
 
                     <!-- Related Tours -->
                     @if($article->tours && $article->tours->count() > 0)
-                    <div class="not-prose mt-8 p-8 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl">
+                    <div class="not-prose mt-8 p-8 bg-linear-to-br from-orange-50 to-orange-100 rounded-2xl">
                         <h3 class="font-playfair text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                             🎫 <span>Recommended Tours</span>
                         </h3>
@@ -177,7 +177,7 @@
 
                     <!-- Related Restaurants -->
                     @if($article->restaurants && $article->restaurants->count() > 0)
-                    <div class="not-prose mt-8 p-8 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl">
+                    <div class="not-prose mt-8 p-8 bg-linear-to-br from-green-50 to-green-100 rounded-2xl">
                         <h3 class="font-playfair text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                             🍽️ <span>Recommended Restaurants</span>
                         </h3>
@@ -268,7 +268,7 @@
                     @endif
 
                     <!-- Newsletter CTA -->
-                    <div class="bg-gradient-to-br from-java-accent to-orange-600 rounded-2xl p-6 text-white shadow-lg">
+                    <div class="bg-linear-to-br from-java-accent to-orange-600 rounded-2xl p-6 text-white shadow-lg">
                         <h3 class="font-playfair text-2xl font-bold mb-3">
                             📬 Stay Updated
                         </h3>
@@ -309,10 +309,10 @@
                              alt="{{ $related->title }}" 
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                     @else
-                        <div class="w-full h-full bg-gradient-to-br from-java-primary to-java-accent"></div>
+                        <div class="w-full h-full bg-linear-to-br from-java-primary to-java-accent"></div>
                     @endif
                     
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                    <div class="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent"></div>
                     
                     <!-- Article Type Badge -->
                     <div class="absolute top-4 left-4">

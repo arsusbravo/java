@@ -9,7 +9,7 @@
     <!-- Background Image -->
     <div class="absolute inset-0">
         <img src="{{ image_url($region->image, 'region') }}" alt="{{ $region->name }}" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80"></div>
+        <div class="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/80"></div>
     </div>
     
     <!-- Content -->
@@ -80,7 +80,7 @@
                     <img src="{{ image_url($destination->featured_image, 'destination') }}" 
                          alt="{{ $destination->name }}" 
                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
+                    <div class="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
                     <div class="absolute inset-0 p-8 flex flex-col justify-end">
                         <span class="inline-block w-fit px-4 py-2 bg-java-accent rounded-full text-white text-sm font-semibold mb-4">
                             Featured
@@ -197,7 +197,7 @@
                         <img src="{{ image_url($otherRegion->image, 'region') }}" 
                              alt="{{ $otherRegion->name }}" 
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                        <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent"></div>
                         <div class="absolute bottom-6 left-6 right-6">
                             <h3 class="font-playfair text-3xl font-bold text-white mb-2 group-hover:text-java-accent transition-colors">
                                 {{ $otherRegion->name }}

@@ -145,7 +145,7 @@
                     <img src="{{ image_url($destination->featured_image, 'destination') }}" 
                          alt="{{ $destination->name }}" 
                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
+                    <div class="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
                     <div class="absolute inset-0 p-6 flex flex-col justify-end">
                         <span class="inline-block w-fit px-3 py-1 bg-java-accent rounded-full text-white text-xs font-semibold mb-3">
                             {{ $destination->region->name }}
@@ -265,7 +265,7 @@
 </section>
 
 <!-- Call to Action -->
-<section class="py-24 bg-gradient-to-br from-java-primary to-java-dark text-white">
+<section class="py-24 bg-linear-to-br from-java-primary to-java-dark text-white">
     <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
         <h2 class="font-playfair text-4xl md:text-5xl font-bold mb-6">
             Ready to Explore Java?
