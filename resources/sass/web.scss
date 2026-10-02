@@ -1,0 +1,227 @@
+// Import Sass color module for modern color functions
+@use 'sass:color';
+
+// Frontend Variables for JavaSunrise
+$java-primary: #2c3e50;
+$java-accent: #e67e22;
+$java-dark: #1a252f;
+$java-light: #f8f9fa;
+$white: #ffffff;
+
+// Navigation link underline effect
+.nav-link {
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: $java-accent;
+        transition: width 0.3s ease;
+    }
+
+    &:hover::after {
+        width: 100%;
+    }
+}
+
+// Hero Parallax Effect
+.hero-parallax {
+    .parallax-bg {
+        transition: transform 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+}
+
+// Blob animations
+@keyframes blob {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+    25% {
+        transform: translate(20px, -50px) scale(1.1);
+    }
+    50% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+    75% {
+        transform: translate(10px, 50px) scale(1.05);
+    }
+}
+
+.animate-blob {
+    animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+    animation-delay: 4s;
+}
+
+// Bounce animation for badge
+@keyframes bounce-slow {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.animate-bounce-slow {
+    animation: bounce-slow 3s ease-in-out infinite;
+}
+
+// Scroll indicator animation
+@keyframes scroll {
+    0% {
+        opacity: 0;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+
+.animate-scroll {
+    animation: scroll 2s ease-in-out infinite;
+}
+
+// Hero content fade in animation
+.hero-content {
+    animation: fadeInUp 1.2s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Scroll triggered fade in up animation
+@keyframes animate-fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: animate-fade-in-up 0.8s ease forwards;
+}
+
+// CTA Button effects
+.cta-button {
+    box-shadow: 0 20px 40px rgba(230, 126, 34, 0.3);
+
+    &:hover {
+        box-shadow: 0 25px 50px rgba(230, 126, 34, 0.4);
+    }
+}
+
+// Destination card effects
+.destination-card {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    
+    &:hover {
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+}
+
+// Article card effects
+.article-card {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &:hover {
+        transform: translateY(-8px);
+    }
+}
+
+.article-card-small {
+    &:hover {
+        transform: translateX(4px);
+    }
+}
+
+// Testimonial card hover effect
+.testimonial-card {
+    transition: all 0.3s ease;
+    
+    &:hover {
+        transform: translateY(-4px);
+    }
+}
+
+// Scroll animations setup
+.scroll-animate {
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+// Responsive adjustments
+@media (max-width: 1024px) {
+    .hero-content h1 {
+        font-size: 3.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-content p {
+        font-size: 1.1rem;
+    }
+
+    .destination-card {
+        min-height: 400px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        font-size: 1.4rem !important;
+    }
+
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+    }
+}
+
+// Custom scrollbar
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $java-accent;
+    border-radius: 5px;
+
+    &:hover {
+        background: color.adjust($java-accent, $lightness: -10%);
+    }
+}
