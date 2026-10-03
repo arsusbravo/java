@@ -14,6 +14,9 @@ class Column
 {
     public bool $sortable = false;
 
+    /** Boolean columns that can be switched on and off right from the list. */
+    public bool $toggleable = false;
+
     public ?Closure $value = null;
 
     public function __construct(
@@ -30,6 +33,13 @@ class Column
     public function sortable(bool $sortable = true): static
     {
         $this->sortable = $sortable;
+
+        return $this;
+    }
+
+    public function toggleable(bool $toggleable = true): static
+    {
+        $this->toggleable = $toggleable;
 
         return $this;
     }
@@ -61,6 +71,7 @@ class Column
             'label' => $this->label,
             'type' => $this->type,
             'sortable' => $this->sortable,
+            'toggleable' => $this->toggleable,
         ];
     }
 }

@@ -147,6 +147,29 @@ class ResourceController extends Controller
     }
 
     /**
+     * Flip a yes/no column from the list, e.g. make a destination featured.
+     */
+    public function toggle(string $resource, string $id, string $column): RedirectResponse
+    {
+        $resource = $this->editableResource($resource);
+        $definition = collect($resource->columns())
+            ->first(fn (Column $candidate) => $candidate->name === $column && $candidate->toggleable && $candidate->type === 'boolean');
+
+        abort_unless($definition, 404);
+
+        $model = $resource->query()->findOrFail($id);
+        $model->setAttribute($column, ! $model->getAttribute($column))->save();
+        $resource->saved($model, false);
+
+        return back()->with('success', sprintf(
+            '%s: %s %s.',
+            $resource->title($model),
+            $definition->label,
+            $model->getAttribute($column) ? 'on' : 'off',
+        ));
+    }
+
+    /**
      * Apply a one-click row action, e.g. approve a review.
      */
     public function action(string $resource, string $id, string $action): RedirectResponse

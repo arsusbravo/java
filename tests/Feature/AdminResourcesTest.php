@@ -305,3 +305,31 @@ test('slugs and emails are limited to 191 characters, the longest that old Maria
     $this->post('/admin/users', ['name' => 'X', 'email' => str_repeat('a', 180) . '@example.com', 'password' => 'secret-pass'])
         ->assertSessionHasErrors('email');
 });
+
+test('featured can be switched on and off from the destinations list', function () {
+    $destination = Destination::where('slug', 'jakarta')->firstOrFail();
+    expect($destination->is_featured)->toBeFalse();
+
+    $this->get('/admin/destinations')->assertInertia(fn (Assert $page) => $page
+        ->where('columns', fn ($columns) => collect($columns)->firstWhere('name', 'is_featured')['toggleable'] === true));
+
+    $this->post("/admin/destinations/{$destination->id}/toggle/is_featured")
+        ->assertRedirect()
+        ->assertSessionHas('success', 'Jakarta: Featured on.');
+    expect($destination->fresh()->is_featured)->toBeTrue();
+
+    $this->post("/admin/destinations/{$destination->id}/toggle/is_featured")->assertSessionHas('success', 'Jakarta: Featured off.');
+    expect($destination->fresh()->is_featured)->toBeFalse();
+});
+
+test('only columns marked toggleable can be switched', function () {
+    $destination = Destination::firstOrFail();
+
+    $this->post("/admin/destinations/{$destination->id}/toggle/name")->assertNotFound();          // not a yes/no column
+    $this->post("/admin/destinations/{$destination->id}/toggle/views_count")->assertNotFound();
+    $this->post('/admin/articles/' . Article::first()->id . '/toggle/is_featured')->assertNotFound(); // not enabled there
+    $this->post('/admin/destinations/999999/toggle/is_featured')->assertNotFound();
+
+    auth()->logout();
+    $this->post("/admin/destinations/{$destination->id}/toggle/is_featured")->assertRedirect('/login');
+});

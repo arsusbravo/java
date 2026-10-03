@@ -60,7 +60,7 @@ class DestinationResource extends Resource
             Column::make('name')->sortable(),
             Column::make('region.name', 'Region'),
             Column::make('types', 'Types')->value(fn ($destination) => $destination->types->pluck('name')->implode(', ')),
-            Column::make('is_featured', 'Featured', 'boolean')->sortable(),
+            Column::make('is_featured', 'Featured', 'boolean')->sortable()->toggleable(),
             Column::make('order', 'Order', 'number')->sortable(),
             Column::make('views_count', 'Views', 'number')->sortable(),
         ];

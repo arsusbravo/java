@@ -20,7 +20,7 @@ import {
     Search,
     Trash2,
 } from 'lucide-vue-next';
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 
 const props = defineProps<{
     resource: ResourceMeta;
@@ -103,6 +103,29 @@ const availableActions = (row: RecordRow) =>
             ([key, value]) => row.cells[key] !== value,
         ),
     );
+
+// Flip a yes/no cell right away; the server response confirms (or reverts) it
+const toggling = ref<string | null>(null);
+
+const toggle = (row: RecordRow, column: Column) => {
+    const key = `${row.id}:${column.name}`;
+    if (toggling.value === key) return;
+
+    const previous = row.cells[column.name];
+    row.cells[column.name] = !previous;
+    toggling.value = key;
+
+    router.post(
+        `${baseUrl.value}/${row.id}/toggle/${column.name}`,
+        {},
+        {
+            preserveScroll: true,
+            preserveState: true,
+            onError: () => (row.cells[column.name] = previous),
+            onFinish: () => (toggling.value = null),
+        },
+    );
+};
 
 const runAction = (row: RecordRow, action: string) => {
     router.post(
@@ -305,6 +328,41 @@ const label = (value: unknown) =>
                                 >
                                     {{ label(row.cells[column.name]) }}
                                 </span>
+                                <button
+                                    v-else-if="
+                                        column.type === 'boolean' &&
+                                        column.toggleable &&
+                                        resource.editable
+                                    "
+                                    type="button"
+                                    role="switch"
+                                    :aria-checked="!!row.cells[column.name]"
+                                    :aria-label="`${column.label}: ${row.title}`"
+                                    :title="
+                                        row.cells[column.name]
+                                            ? `${column.label}, click to turn off`
+                                            : `Click to make ${column.label.toLowerCase()}`
+                                    "
+                                    :disabled="
+                                        toggling === `${row.id}:${column.name}`
+                                    "
+                                    :class="[
+                                        'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:opacity-60',
+                                        row.cells[column.name]
+                                            ? 'bg-green-600'
+                                            : 'bg-muted-foreground/30',
+                                    ]"
+                                    @click="toggle(row, column)"
+                                >
+                                    <span
+                                        :class="[
+                                            'inline-block size-4 rounded-full bg-white shadow transition-transform',
+                                            row.cells[column.name]
+                                                ? 'translate-x-4.5'
+                                                : 'translate-x-0.5',
+                                        ]"
+                                    />
+                                </button>
                                 <template v-else-if="column.type === 'boolean'">
                                     <Check
                                         v-if="row.cells[column.name]"

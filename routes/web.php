@@ -55,6 +55,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
             Route::put('/{resource}/{id}', 'update')->name('update');
             Route::delete('/{resource}/{id}', 'destroy')->name('destroy');
             Route::post('/{resource}/{id}/actions/{action}', 'action')->name('action');
+            Route::post('/{resource}/{id}/toggle/{column}', 'toggle')->name('toggle');
             Route::get('/{resource}/fields/{field}/options', 'fieldOptions')->name('field-options');
         });
 });

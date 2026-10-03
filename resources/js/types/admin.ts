@@ -70,6 +70,8 @@ export interface Column {
     label: string;
     type: 'text' | 'badge' | 'boolean' | 'image' | 'date' | 'number';
     sortable: boolean;
+    // Boolean column that can be switched from the list
+    toggleable: boolean;
 }
 
 export interface Filter {
