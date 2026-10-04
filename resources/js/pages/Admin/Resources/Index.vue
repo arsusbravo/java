@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import FlashMessages from '@/components/admin/FlashMessages.vue';
 import ToggleSwitch from '@/components/admin/ToggleSwitch.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
@@ -184,8 +183,6 @@ const label = (value: unknown) =>
                     New {{ resource.singular }}
                 </Link>
             </div>
-
-            <FlashMessages />
 
             <!-- Toolbar -->
             <div class="flex flex-wrap items-center gap-2">

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import FlashMessages from '@/components/admin/FlashMessages.vue';
 import InputError from '@/components/InputError.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
@@ -295,8 +294,6 @@ const generateSlug = (text: string) => {
                     Add Region
                 </button>
             </div>
-
-            <FlashMessages />
 
             <!-- Regions List -->
             <div class="space-y-4">

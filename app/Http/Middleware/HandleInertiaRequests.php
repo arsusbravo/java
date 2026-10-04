@@ -46,8 +46,11 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            // Shown as toasts (resources/js/components/Toaster.vue)
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
+                'info' => fn () => $request->session()->get('info'),
+                'warning' => fn () => $request->session()->get('warning'),
                 'error' => fn () => $request->session()->get('error'),
             ],
             'adminNav' => fn () => $request->user() ? Admin::navigation() : [],

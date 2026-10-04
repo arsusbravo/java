@@ -24,7 +24,12 @@ export type AppPageProps<
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
-    flash: { success: string | null; error: string | null };
+    flash: {
+        success: string | null;
+        info: string | null;
+        warning: string | null;
+        error: string | null;
+    };
     adminNav: NavGroup[];
     sidebarOpen: boolean;
 };

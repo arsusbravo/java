@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import FieldInput from '@/components/admin/FieldInput.vue';
-import FlashMessages from '@/components/admin/FlashMessages.vue';
 import { adminFormKey } from '@/components/admin/form';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
@@ -139,8 +138,6 @@ const destroy = () => {
                     View on site
                 </a>
             </div>
-
-            <FlashMessages />
 
             <div
                 class="grid gap-x-5 gap-y-5 rounded-lg border border-sidebar-border bg-card p-4 sm:grid-cols-2 sm:p-6"

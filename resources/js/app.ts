@@ -4,7 +4,9 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
+import Toaster from './components/Toaster.vue';
 import { initializeTheme } from './composables/useAppearance';
+import { listenForFlashMessages, type Flash } from './composables/useToasts';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -16,9 +18,12 @@ createInertiaApp({
             import.meta.glob<DefineComponent>('./pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
+        // Toasts live outside the pages, so they stay put while pages change
+        createApp({ render: () => [h(App, props), h(Toaster)] })
             .use(plugin)
             .mount(el);
+
+        listenForFlashMessages(props.initialPage.props.flash as Flash);
     },
     progress: {
         color: '#4B5563',
