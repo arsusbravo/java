@@ -50,7 +50,7 @@ abstract class ListingResource extends Resource
             Column::make('affiliateNetwork.name', 'Network'),
             Column::make('status', 'Status', 'badge')->sortable(),
             Column::make('is_active', 'Active', 'boolean')->sortable(),
-            Column::make('is_featured', 'Featured', 'boolean')->sortable(),
+            Column::make('is_featured', 'Featured', 'boolean')->sortable()->toggleable(),
             Column::make('views_count', 'Views', 'number')->sortable(),
             Column::make('clicks_count', 'Clicks', 'number')->sortable(),
         ];

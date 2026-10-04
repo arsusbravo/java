@@ -327,9 +327,21 @@ test('only columns marked toggleable can be switched', function () {
 
     $this->post("/admin/destinations/{$destination->id}/toggle/name")->assertNotFound();          // not a yes/no column
     $this->post("/admin/destinations/{$destination->id}/toggle/views_count")->assertNotFound();
-    $this->post('/admin/articles/' . Article::first()->id . '/toggle/is_featured')->assertNotFound(); // not enabled there
+    $this->post('/admin/images/' . Image::first()->id . '/toggle/is_featured')->assertNotFound();    // not enabled there
     $this->post('/admin/destinations/999999/toggle/is_featured')->assertNotFound();
 
     auth()->logout();
     $this->post("/admin/destinations/{$destination->id}/toggle/is_featured")->assertRedirect('/login');
 });
+
+test('featured can be switched from every list that has it', function (string $key) {
+    $resource = Admin::find($key);
+    $record = $resource::$model::firstOrFail();
+    $before = (bool) $record->is_featured;
+
+    $this->get("/admin/{$key}")->assertInertia(fn (Assert $page) => $page
+        ->where('columns', fn ($columns) => collect($columns)->firstWhere('name', 'is_featured')['toggleable'] === true));
+
+    $this->post("/admin/{$key}/{$record->id}/toggle/is_featured")->assertRedirect()->assertSessionHas('success');
+    expect((bool) $record->fresh()->is_featured)->toBe(! $before);
+})->with(['destinations', 'articles', 'accommodations', 'tours', 'restaurants']);

@@ -61,7 +61,7 @@ class ArticleResource extends Resource
             Column::make('title')->sortable(),
             Column::make('article_type', 'Type', 'badge')->sortable(),
             Column::make('status', 'Status', 'badge')->sortable(),
-            Column::make('is_featured', 'Featured', 'boolean')->sortable(),
+            Column::make('is_featured', 'Featured', 'boolean')->sortable()->toggleable(),
             Column::make('author.name', 'Author'),
             Column::make('views_count', 'Views', 'number')->sortable(),
             Column::make('published_at', 'Published', 'date')->sortable(),
