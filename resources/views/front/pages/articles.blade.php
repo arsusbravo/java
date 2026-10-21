@@ -50,7 +50,7 @@
             @endif
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <a href="#articles-list" class="cta-button group inline-flex items-center gap-3 px-10 py-5 bg-java-accent hover:bg-java-accent/90 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 shadow-2xl hover:shadow-java-accent/50">
+                <a href="{{ $ctaPrimaryLink ?? '#articles-list' }}" class="cta-button group inline-flex items-center gap-3 px-10 py-5 bg-java-accent hover:bg-java-accent/90 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 shadow-2xl hover:shadow-java-accent/50">
                     <span>{{ $ctaPrimary }}</span>
                     <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>

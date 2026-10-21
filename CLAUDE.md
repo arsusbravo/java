@@ -19,6 +19,8 @@ Travel guide and affiliate site for Java, Indonesia. The public site is Blade (`
 - "Where to Stay" on a destination tops up linked hotels with `Accommodation::nearest($lat, $lng, $limit, $except)`: a bounding box on the indexed `latitude`/`longitude`, then an exact distance in PHP (`App\Support\Geo`), widening 5 → 100 km until enough are found; results are ranked by star rating, then distance. It is kept in PHP so it also runs on SQLite in tests.
 - "Nearby Places" on a destination is `$destination->nearby()`: the 6 closest other destinations by coordinates, any region, no distance limit. The "Other Places" sidebar is up to 6 random places from the same region. Format distances with `distance_label($km)`.
 - Admin notifications are toasts (`resources/js/components/Toaster.vue`, mounted once in `app.ts`). From PHP, redirect with `->with('success'|'info'|'warning'|'error', $message)`; from Vue, call `toast(type, message)` from `@/composables/useToasts`. Don't add inline flash banners to pages.
+- Booking links always go through `route('go', [type, id, 'from' => source])` (`AffiliateRedirectController`), never straight to `affiliate_url`. It records the click (anonymised IP, `AffiliateClick::SOURCES`, bots and 10-minute repeats skipped), then redirects. Headless browsers count as bots, so set a normal user agent when testing clicks.
+- The Trip Planner (`/trip-planner`, `App\Support\TripPlanner`) is deterministic and keeps every choice in the URL, so shared links rebuild the same trip.
 - Large relations (more than `Field::MAX_INLINE_CHOICES` rows) are searched through `admin/{resource}/fields/{field}/options` instead of being sent with the form.
 
 <laravel-boost-guidelines>

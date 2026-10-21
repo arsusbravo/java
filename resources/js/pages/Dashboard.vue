@@ -21,6 +21,13 @@ defineProps<{
         item: string | null;
     }[];
     topArticles: { id: number; title: string; views_count: number }[];
+    topClicked: {
+        name: string;
+        type: string;
+        clicks: number;
+        editUrl: string | null;
+    }[];
+    clicksBySource: { source: string; clicks: number }[];
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -199,6 +206,92 @@ const number = (value: number) => value.toLocaleString();
                             >
                         </li>
                     </ol>
+                </section>
+
+                <!-- Booking clicks -->
+                <section
+                    class="rounded-xl border border-sidebar-border bg-card lg:col-span-2"
+                >
+                    <header
+                        class="flex items-center justify-between border-b border-sidebar-border px-4 py-3"
+                    >
+                        <h2 class="font-semibold">
+                            Booking clicks (last 30 days)
+                        </h2>
+                        <Link
+                            href="/admin/affiliate-clicks"
+                            class="text-sm text-muted-foreground hover:text-foreground"
+                            >View all</Link
+                        >
+                    </header>
+                    <p
+                        v-if="!topClicked.length"
+                        class="px-4 py-8 text-center text-sm text-muted-foreground"
+                    >
+                        No booking clicks yet. They appear here as soon as
+                        visitors click Book Now.
+                    </p>
+                    <div v-else class="grid gap-6 p-4 md:grid-cols-2">
+                        <div>
+                            <h3
+                                class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
+                            >
+                                Most clicked
+                            </h3>
+                            <ol class="divide-y divide-sidebar-border text-sm">
+                                <li
+                                    v-for="item in topClicked"
+                                    :key="`${item.type}-${item.name}`"
+                                    class="flex items-center justify-between gap-3 py-2"
+                                >
+                                    <Link
+                                        v-if="item.editUrl"
+                                        :href="item.editUrl"
+                                        class="truncate hover:text-primary hover:underline"
+                                        >{{ item.name }}</Link
+                                    >
+                                    <span v-else class="truncate">{{
+                                        item.name
+                                    }}</span>
+                                    <span
+                                        class="shrink-0 text-muted-foreground tabular-nums"
+                                        >{{ number(item.clicks) }}</span
+                                    >
+                                </li>
+                            </ol>
+                        </div>
+                        <div>
+                            <h3
+                                class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
+                            >
+                                Where clicks come from
+                            </h3>
+                            <ul class="space-y-2 text-sm">
+                                <li
+                                    v-for="row in clicksBySource"
+                                    :key="row.source"
+                                >
+                                    <div class="mb-1 flex justify-between">
+                                        <span>{{ row.source }}</span>
+                                        <span
+                                            class="text-muted-foreground tabular-nums"
+                                            >{{ number(row.clicks) }}</span
+                                        >
+                                    </div>
+                                    <div
+                                        class="h-1.5 overflow-hidden rounded-full bg-muted"
+                                    >
+                                        <div
+                                            class="h-full rounded-full bg-primary"
+                                            :style="{
+                                                width: `${(row.clicks / Math.max(...clicksBySource.map((r) => r.clicks))) * 100}%`,
+                                            }"
+                                        />
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </section>
             </div>
 

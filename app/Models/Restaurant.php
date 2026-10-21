@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasAffiliateLink;
+use App\Support\Geo;
+use Illuminate\Database\Eloquent\Collection;
 use App\Models\Concerns\HasFeaturedImage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -94,7 +96,57 @@ class Restaurant extends Model
         return $query->where('is_featured', true);
     }
 
+    /** Search radii for nearest(): people walk or take a short ride to eat. */
+    public const NEARBY_RADII_KM = [2, 5, 10, 25];
+
     // Helper Methods
+
+    /**
+     * Published, active restaurants near a point, closest first (better rated
+     * first at the same distance), each with a `distance_km` attribute.
+     *
+     * @param  array<int>  $except  IDs to leave out, e.g. restaurants already shown
+     */
+    public static function nearest(float $lat, float $lng, int $limit, array $except = [], array $with = []): Collection
+    {
+        foreach (self::NEARBY_RADII_KM as $radius) {
+            [[$minLat, $maxLat], [$minLng, $maxLng]] = Geo::boundingBox($lat, $lng, $radius);
+
+            $restaurants = static::query()
+                ->published()
+                ->where('is_active', true)
+                ->whereBetween('latitude', [$minLat, $maxLat])
+                ->whereBetween('longitude', [$minLng, $maxLng])
+                ->whereNotIn('id', $except)
+                ->get()
+                ->each(fn ($restaurant) => $restaurant->distance_km = Geo::distanceKm($lat, $lng, (float) $restaurant->latitude, (float) $restaurant->longitude))
+                ->filter(fn ($restaurant) => $restaurant->distance_km <= $radius)
+                ->sortBy([
+                    fn ($a, $b) => round($a->distance_km, 1) <=> round($b->distance_km, 1),
+                    fn ($a, $b) => ($b->average_rating ?? 0) <=> ($a->average_rating ?? 0),
+                ]);
+
+            if ($restaurants->count() >= $limit || $radius === max(self::NEARBY_RADII_KM)) {
+                return $restaurants->take($limit)->values()->load($with);
+            }
+        }
+
+        return new Collection;
+    }
+
+    /**
+     * Google Maps directions to the restaurant, when it has coordinates.
+     */
+    public function getDirectionsUrlAttribute(): ?string
+    {
+        if ($this->latitude === null || $this->longitude === null) {
+            return null;
+        }
+
+        return 'https://www.google.com/maps/dir/?api=1&destination=' . $this->latitude . ',' . $this->longitude;
+    }
+
+
     public function incrementViews()
     {
         $this->increment('views_count');

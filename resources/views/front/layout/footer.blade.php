@@ -1,4 +1,4 @@
-<footer class="bg-java-dark text-white pt-16 pb-8">
+<footer class="print:hidden bg-java-dark text-white pt-16 pb-8">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             <!-- About -->

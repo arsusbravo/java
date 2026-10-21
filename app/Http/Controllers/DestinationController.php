@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Accommodation;
 use App\Models\Destination;
+use App\Models\Restaurant;
 use App\Models\Region;
 use Illuminate\Http\Request;
 
@@ -112,14 +113,31 @@ class DestinationController extends Controller
             ->limit(6)
             ->get();
 
-        // Get restaurants for this destination
-        $restaurants = $destination->restaurants()
-            ->with(['images', 'reviews'])
+        // Restaurants linked to this destination (picker or destination field)...
+        $restaurantLimit = 6;
+        $restaurantRelations = ['images', 'affiliateNetwork'];
+        $restaurants = Restaurant::query()
+            ->where(fn ($query) => $query
+                ->where('destination_id', $destination->id)
+                ->orWhereHas('destinations', fn ($linked) => $linked->whereKey($destination->id)))
+            ->with($restaurantRelations)
             ->published()
             ->where('is_active', true)
-            ->orderBy('clicks_count', 'desc')
-            ->limit(6)
+            ->orderBy('is_featured', 'desc')
+            ->orderBy('average_rating', 'desc')
+            ->limit($restaurantLimit)
             ->get();
+
+        // ...topped up with the nearest ones, so new restaurants show without linking
+        if ($restaurants->count() < $restaurantLimit && $destination->latitude !== null && $destination->longitude !== null) {
+            $restaurants = $restaurants->concat(Restaurant::nearest(
+                (float) $destination->latitude,
+                (float) $destination->longitude,
+                $restaurantLimit - $restaurants->count(),
+                $restaurants->modelKeys(),
+                $restaurantRelations,
+            ));
+        }
 
         // Get articles about this destination
         $articles = $destination->articles()

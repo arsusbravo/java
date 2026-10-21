@@ -61,6 +61,9 @@
 <!-- Featured Destinations -->
 @include('front.pages.sections.features')
 
+<!-- Trip Planner -->
+@include('front.pages.sections.tripPlannerBanner')
+
 <!-- Latest Articles - Magazine Style -->
 @include('front.pages.sections.lastArticles')
 

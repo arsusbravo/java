@@ -34,6 +34,12 @@
                     </svg>
                     <span>{{ number_format($destination->views_count) }} views</span>
                 </div>
+                @if($destination->latitude !== null)
+                    <a href="{{ route('trip-planner', ['start' => $destination->slug]) }}" class="inline-flex items-center gap-2 rounded-full bg-java-accent px-5 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-orange-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                        Plan a trip from here
+                    </a>
+                @endif
             </div>
         </div>
     </div>
@@ -114,7 +120,7 @@
                             <span class="text-sm text-gray-500">Check prices on {{ $accommodation->affiliateNetwork?->name ?? 'partner site' }}</span>
                         @endif
                         @if($accommodation->affiliate_url)
-                            <a href="{{ $accommodation->affiliate_url }}" target="_blank" rel="nofollow sponsored noopener" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm whitespace-nowrap">
+                            <a href="{{ route('go', ['hotel', $accommodation->id, 'from' => 'destination']) }}" target="_blank" rel="nofollow sponsored noopener" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm whitespace-nowrap">
                                 Book Now
                             </a>
                         @endif
@@ -173,28 +179,17 @@
                 </div>
                 <div class="p-4">
                     <h3 class="font-bold text-lg mb-2">{{ $tour->name }}</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            @for($i = 0; $i < 5; $i++)
-                                @if($i < floor($tour->average_rating))
-                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                                    </svg>
-                                @else
-                                    <svg class="w-4 h-4 fill-current text-gray-300" viewBox="0 0 20 20">
-                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                                    </svg>
-                                @endif
-                            @endfor
-                        </div>
-                        <span class="ml-2 text-sm text-gray-600">{{ number_format($tour->average_rating, 1) }}</span>
-                    </div>
                     <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ text_excerpt($tour->short_description ?: $tour->description, 160) }}</p>
                     <div class="flex justify-between items-center">
-                        <span class="text-green-600 font-bold">From ${{ number_format($tour->price_per_person, 0) }}/person</span>
-                        <a href="{{ $tour->affiliate_url }}" target="_blank" rel="nofollow" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
+                        <span class="text-sm text-gray-600">
+                            @if($tour->duration){{ $tour->duration }} {{ Str::plural(Str::singular($tour->duration_unit), $tour->duration) }}@endif
+                            @if($tour->price_from)<span class="ml-1 font-bold text-green-600">· From {{ $tour->currency }} {{ number_format($tour->price_from, 0) }}</span>@endif
+                        </span>
+                        @if($tour->affiliate_url)
+                        <a href="{{ route('go', ['tour', $tour->id, 'from' => 'destination']) }}" target="_blank" rel="nofollow sponsored noopener" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
                             Book Tour
                         </a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -205,44 +200,65 @@
 
     <!-- Restaurants Section -->
     @if($restaurants->count() > 0)
-    <section class="mb-16">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-3xl font-bold">Where to Eat</h2>
-            <a href="{{ route('destinations.show', [$destination->region->slug, $destination->slug]) }}?section=restaurants" class="text-blue-600 hover:text-blue-800">View All →</a>
+    <section class="mb-16" aria-labelledby="where-to-eat-heading">
+        <div class="mb-8">
+            <h2 id="where-to-eat-heading" class="text-3xl font-bold">Where to Eat</h2>
+            @if($restaurants->contains(fn ($restaurant) => isset($restaurant->distance_km)))
+                <p class="mt-1 text-gray-600">Including places to eat near {{ $destination->name }}</p>
+            @endif
         </div>
-        
+
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($restaurants as $restaurant)
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                <div class="relative h-48 bg-cover bg-center" style="background-image: url('{{ $restaurant->featured_image_url }}');">
-                    <div class="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm">
-                        {{ implode(', ', $restaurant->cuisine_type ?? []) }}
-                    </div>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-lg mb-2">{{ $restaurant->name }}</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            @for($i = 0; $i < 5; $i++)
-                                @if($i < floor($restaurant->average_rating))
-                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                                    </svg>
-                                @else
-                                    <svg class="w-4 h-4 fill-current text-gray-300" viewBox="0 0 20 20">
-                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                                    </svg>
-                                @endif
-                            @endfor
+            <div class="flex flex-col bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                <div class="relative h-48 bg-cover bg-center" style="background-image: url('{{ $restaurant->featured_image_url }}');" role="img" aria-label="{{ $restaurant->name }}">
+                    @isset($restaurant->distance_km)
+                        <div class="absolute top-4 left-4 bg-white/90 text-gray-800 px-3 py-1 rounded-full text-sm font-medium shadow-sm">
+                            {{ distance_label($restaurant->distance_km) }} away
                         </div>
-                        <span class="ml-2 text-sm text-gray-600">{{ number_format($restaurant->average_rating, 1) }}</span>
+                    @endisset
+                    @if($restaurant->cuisine_type)
+                        <div class="absolute top-4 right-4 max-w-[60%] truncate bg-red-600 text-white px-3 py-1 rounded-full text-sm">
+                            {{ implode(', ', $restaurant->cuisine_type) }}
+                        </div>
+                    @endif
+                </div>
+                <div class="flex flex-1 flex-col p-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <h3 class="font-bold text-lg">{{ $restaurant->name }}</h3>
+                        @if($restaurant->price_range)
+                            <span class="shrink-0 font-bold text-red-600" title="Price level">{{ $restaurant->price_range }}</span>
+                        @endif
                     </div>
-                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ text_excerpt($restaurant->description, 160) }}</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-red-600 font-bold">${{ $restaurant->price_range }}</span>
-                        <a href="{{ $restaurant->affiliate_url }}" target="_blank" rel="nofollow" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm">
-                            View Menu
-                        </a>
+                    @if($restaurant->average_rating)
+                        <div class="flex items-center gap-1 mt-1 text-yellow-400" aria-label="Rated {{ number_format($restaurant->average_rating, 1) }} out of 5">
+                            @for($i = 0; $i < 5; $i++)
+                                <svg class="w-4 h-4 fill-current {{ $i < round($restaurant->average_rating) ? '' : 'text-gray-300' }}" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            @endfor
+                            <span class="ml-1 text-sm text-gray-600">{{ number_format($restaurant->average_rating, 1) }}</span>
+                        </div>
+                    @endif
+                    @if($restaurant->description)
+                        <p class="mt-2 text-gray-600 text-sm line-clamp-2">{{ text_excerpt($restaurant->description, 160) }}</p>
+                    @endif
+                    <ul class="mt-3 space-y-1 text-sm text-gray-600">
+                        @if($restaurant->address)
+                            <li class="flex gap-2"><span aria-hidden="true">📍</span><span>{{ $restaurant->address }}</span></li>
+                        @endif
+                        @if($restaurant->opening_hours)
+                            <li class="flex gap-2"><span aria-hidden="true">🕒</span><span>{{ implode(' · ', $restaurant->opening_hours) }}</span></li>
+                        @endif
+                        @if($restaurant->phone)
+                            <li class="flex gap-2"><span aria-hidden="true">📞</span><a href="tel:{{ preg_replace('/[^\d+]/', '', $restaurant->phone) }}" class="hover:text-red-600">{{ $restaurant->phone }}</a></li>
+                        @endif
+                    </ul>
+                    <div class="mt-auto flex flex-wrap gap-2 pt-4">
+                        @if($restaurant->directions_url)
+                            <a href="{{ $restaurant->directions_url }}" target="_blank" rel="noopener" class="rounded border border-gray-300 px-4 py-2 text-sm hover:border-red-600 hover:text-red-600">Directions</a>
+                        @endif
+                        @if($restaurant->affiliate_url)
+                            <a href="{{ route('go', ['restaurant', $restaurant->id, 'from' => 'destination']) }}" target="_blank" rel="nofollow sponsored noopener" class="rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700">Menu &amp; booking</a>
+                        @endif
                     </div>
                 </div>
             </div>

@@ -142,7 +142,7 @@ test('hotels in destination cities appear on the destination page with a booking
     $this->get("/destinations/{$solo->region->slug}/solo")
         ->assertOk()
         ->assertSee('Hotel Tugu Malang')
-        ->assertSee('cid=1976274&amp;hl=en-us&amp;hid=255678', false)
+        ->assertSee('/go/hotel/' . Accommodation::where('external_id', '255678')->value('id') . '?from=destination', false)
         ->assertSee('Resort')
         ->assertDontSee('/night');
 });

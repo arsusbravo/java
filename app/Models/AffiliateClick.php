@@ -11,9 +11,18 @@ class AffiliateClick extends Model
 
     public $timestamps = false;
 
+    /** Where on the site a booking click can come from (`?from=` on /go links). */
+    public const SOURCES = [
+        'destination' => 'Destination page',
+        'trip_planner' => 'Trip Planner',
+        'article' => 'Article',
+        'other' => 'Other',
+    ];
+
     protected $fillable = [
         'clickable_id',
         'clickable_type',
+        'source',
         'ip_address',
         'user_agent',
         'referrer',

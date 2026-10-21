@@ -121,9 +121,13 @@ class Accommodation extends Model
      * then ranks them by star rating, highest first, and distance for equal ratings.
      *
      * @param  array<int>  $except  IDs to leave out, e.g. hotels already shown
+     * @param  array{0: ?int, 1: ?int}|null  $stars  Star range [min, max]; a null max of 3
+     *                                              or lower also allows unrated places
      */
-    public static function nearest(float $lat, float $lng, int $limit, array $except = [], array $with = []): Collection
+    public static function nearest(float $lat, float $lng, int $limit, array $except = [], array $with = [], ?array $stars = null): Collection
     {
+        [$minStars, $maxStars] = $stars ?? [null, null];
+
         foreach (self::NEARBY_RADII_KM as $radius) {
             [[$minLat, $maxLat], [$minLng, $maxLng]] = Geo::boundingBox($lat, $lng, $radius);
 
@@ -133,6 +137,11 @@ class Accommodation extends Model
                 ->whereBetween('latitude', [$minLat, $maxLat])
                 ->whereBetween('longitude', [$minLng, $maxLng])
                 ->whereNotIn('id', $except)
+                ->when($minStars !== null, fn ($query) => $query->where('star_rating', '>=', $minStars))
+                ->when($maxStars !== null, fn ($query) => $query->where(fn ($query) => $query
+                    ->where('star_rating', '<=', $maxStars)
+                    // Unrated homestays and guesthouses belong with budget stays
+                    ->when($maxStars <= 3 && $minStars === null, fn ($query) => $query->orWhereNull('star_rating'))))
                 ->get()
                 ->each(fn ($hotel) => $hotel->distance_km = Geo::distanceKm($lat, $lng, (float) $hotel->latitude, (float) $hotel->longitude))
                 ->filter(fn ($hotel) => $hotel->distance_km <= $radius)

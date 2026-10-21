@@ -40,14 +40,15 @@ class AffiliateClickResource extends Resource
             Column::make('clickable', 'Listing')->value(fn ($click) => $click->clickable
                 ? class_basename($click->clickable_type) . ': ' . $click->clickable->name
                 : '(deleted)'),
-            Column::make('referrer'),
+            Column::make('source', 'Source', 'badge')->sortable(),
+            Column::make('referrer', 'From page'),
             Column::make('ip_address', 'IP'),
         ];
     }
 
     public function filters(): array
     {
-        return ['clickable_type' => [
+        return ['source' => Models\AffiliateClick::SOURCES, 'clickable_type' => [
             Models\Accommodation::class => 'Accommodation',
             Models\Tour::class => 'Tour',
             Models\Restaurant::class => 'Restaurant',
