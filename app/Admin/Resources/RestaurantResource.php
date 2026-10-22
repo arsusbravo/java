@@ -5,6 +5,7 @@ namespace App\Admin\Resources;
 use App\Admin\Column;
 use App\Admin\Field;
 use App\Models;
+use Illuminate\Database\Eloquent\Model;
 
 class RestaurantResource extends ListingResource
 {
@@ -54,6 +55,11 @@ class RestaurantResource extends ListingResource
             Column::make('price_range', 'Price', 'badge')->sortable(),
             ...$this->statColumns(),
         ];
+    }
+
+    public function publicUrl(Model $model): ?string
+    {
+        return $model->status === 'published' && $model->is_active ? $model->url() : null;
     }
 
     public function filters(): array

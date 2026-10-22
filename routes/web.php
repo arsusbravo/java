@@ -4,6 +4,7 @@ use App\Http\Controllers\AffiliateRedirectController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\RegionController;
+use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\TripPlannerController;
 use App\Http\Controllers\HomeController;
 use App\Admin\Admin;
@@ -21,6 +22,7 @@ Route::get('/destinations/{region}', [RegionController::class, 'show'])->name('d
 Route::get('/destinations/{region}/{slug}', [DestinationController::class, 'show'])->name('destinations.show');
 
 Route::get('/trip-planner', [TripPlannerController::class, 'show'])->name('trip-planner');
+Route::get('/restaurants/{slug}', [RestaurantController::class, 'show'])->name('restaurants.show');
 
 // Booking links: record the click, then go to the partner site
 Route::get('/go/{type}/{id}', AffiliateRedirectController::class)

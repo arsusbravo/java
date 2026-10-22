@@ -135,6 +135,14 @@ class Restaurant extends Model
     }
 
     /**
+     * The restaurant's own page on the site.
+     */
+    public function url(): string
+    {
+        return route('restaurants.show', $this->slug);
+    }
+
+    /**
      * Google Maps directions to the restaurant, when it has coordinates.
      */
     public function getDirectionsUrlAttribute(): ?string

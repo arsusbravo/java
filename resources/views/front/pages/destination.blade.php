@@ -225,7 +225,7 @@
                 </div>
                 <div class="flex flex-1 flex-col p-4">
                     <div class="flex items-start justify-between gap-3">
-                        <h3 class="font-bold text-lg">{{ $restaurant->name }}</h3>
+                        <h3 class="font-bold text-lg"><a href="{{ $restaurant->url() }}" class="hover:text-red-600">{{ $restaurant->name }}</a></h3>
                         @if($restaurant->price_range)
                             <span class="shrink-0 font-bold text-red-600" title="Price level">{{ $restaurant->price_range }}</span>
                         @endif
@@ -253,6 +253,7 @@
                         @endif
                     </ul>
                     <div class="mt-auto flex flex-wrap gap-2 pt-4">
+                        <a href="{{ $restaurant->url() }}" class="rounded bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-700">Details</a>
                         @if($restaurant->directions_url)
                             <a href="{{ $restaurant->directions_url }}" target="_blank" rel="noopener" class="rounded border border-gray-300 px-4 py-2 text-sm hover:border-red-600 hover:text-red-600">Directions</a>
                         @endif
