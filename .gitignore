@@ -30,3 +30,7 @@ yarn-error.log
 /_ide_helper.php
 /_ide_helper_models.php
 /.phpstorm.meta.php
+
+# Kept local only, not pushed
+/CLAUDE.md
+/.github/workflows/tests.yml

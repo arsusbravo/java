@@ -21,9 +21,12 @@ class RestaurantController extends Controller
                 'destinations.region',
                 'destination.region',
                 'affiliateNetwork',
-                'reviews' => fn ($query) => $query->approved()->latest()->limit(6),
             ])
             ->firstOrFail();
+
+        // A separate query: a limit inside with() needs window functions (MariaDB 10.2+),
+        // and production runs MariaDB 5.5
+        $restaurant->setRelation('reviews', $restaurant->reviews()->approved()->latest()->limit(6)->get());
 
         $restaurant->incrementViews();
 
