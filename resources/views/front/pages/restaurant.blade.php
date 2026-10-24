@@ -150,6 +150,7 @@
                     @endif
                     @if($restaurant->affiliate_url)
                         <a href="{{ route('go', ['restaurant', $restaurant->id, 'from' => 'restaurant']) }}" target="_blank" rel="nofollow sponsored noopener" class="rounded-full bg-java-accent px-5 py-3 text-center font-semibold text-white hover:bg-orange-600">Menu &amp; booking</a>
+                        @include('front.partials.affiliate-note', ['class' => 'text-center'])
                     @endif
                 </div>
             </div>
@@ -197,6 +198,7 @@
                     </div>
                 @endforeach
             </div>
+            @include('front.partials.affiliate-note')
         </section>
     @endif
 

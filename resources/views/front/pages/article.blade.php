@@ -267,17 +267,17 @@
                     </div>
                     @endif
 
-                    <!-- Newsletter CTA -->
+                    <!-- Trip Planner CTA -->
                     <div class="bg-linear-to-br from-java-accent to-orange-600 rounded-2xl p-6 text-white shadow-lg">
                         <h3 class="font-playfair text-2xl font-bold mb-3">
-                            📬 Stay Updated
+                            🗺️ Plan Your Trip
                         </h3>
                         <p class="text-sm mb-4 text-white/90">
-                            Get the latest travel tips and destination guides delivered to your inbox
+                            Get a day-by-day Java itinerary with a place to stay every night
                         </p>
-                        <a href="{{ route('home') }}#newsletter" 
+                        <a href="{{ route('trip-planner') }}"
                            class="block w-full text-center px-6 py-3 bg-white text-java-accent rounded-full font-bold hover:bg-gray-100 transition-all duration-300">
-                            Subscribe Now
+                            Build my itinerary
                         </a>
                     </div>
                 </div>

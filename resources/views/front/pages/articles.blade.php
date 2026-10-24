@@ -28,24 +28,14 @@
             </p>
             
             <!-- Quick Stats (only for plan page) -->
-            @if($pageType === 'plan')
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto mb-12">
-                <div class="text-center backdrop-blur-sm bg-white/10 rounded-2xl p-4 border border-white/20">
-                    <div class="text-3xl md:text-4xl font-bold text-java-accent mb-1">{{ $articles->total() }}</div>
-                    <div class="text-sm text-blue-200">Planning Guides</div>
+            @if($pageType === 'plan' && ! empty($planStats))
+            <div class="flex flex-wrap justify-center gap-6 max-w-3xl mx-auto mb-12">
+                @foreach($planStats as $label => $count)
+                <div class="min-w-36 text-center backdrop-blur-sm bg-white/10 rounded-2xl p-4 border border-white/20">
+                    <div class="text-3xl md:text-4xl font-bold text-java-accent mb-1">{{ number_format($count) }}</div>
+                    <div class="text-sm text-blue-200">{{ $label }}</div>
                 </div>
-                <div class="text-center backdrop-blur-sm bg-white/10 rounded-2xl p-4 border border-white/20">
-                    <div class="text-3xl md:text-4xl font-bold text-java-accent mb-1">50+</div>
-                    <div class="text-sm text-blue-200">Destinations</div>
-                </div>
-                <div class="text-center backdrop-blur-sm bg-white/10 rounded-2xl p-4 border border-white/20">
-                    <div class="text-3xl md:text-4xl font-bold text-java-accent mb-1">20+</div>
-                    <div class="text-sm text-blue-200">Itineraries</div>
-                </div>
-                <div class="text-center backdrop-blur-sm bg-white/10 rounded-2xl p-4 border border-white/20">
-                    <div class="text-3xl md:text-4xl font-bold text-java-accent mb-1">100+</div>
-                    <div class="text-sm text-blue-200">Travel Tips</div>
-                </div>
+                @endforeach
             </div>
             @endif
 

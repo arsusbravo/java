@@ -180,7 +180,7 @@
                 We'd love to hear from you! Whether you have questions about Java Island, want to share your travel story, or have suggestions for our blog, feel free to reach out.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="mailto:hello@javasunrise.com" 
+                <a href="mailto:{{ config('site.email') }}" 
                    class="cta-button group inline-flex items-center gap-3 px-10 py-5 bg-java-accent hover:bg-orange-600 text-white rounded-full font-bold text-lg shadow-2xl shadow-java-accent/30 transition-all duration-300 hover:-translate-y-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>

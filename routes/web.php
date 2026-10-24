@@ -1,20 +1,25 @@
 <?php
 
-use App\Http\Controllers\AffiliateRedirectController;
-use App\Http\Controllers\ArticleController;
-use App\Http\Controllers\DestinationController;
-use App\Http\Controllers\RegionController;
-use App\Http\Controllers\RestaurantController;
-use App\Http\Controllers\TripPlannerController;
-use App\Http\Controllers\HomeController;
 use App\Admin\Admin;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PlaceController;
 use App\Http\Controllers\Admin\ResourceController;
+use App\Http\Controllers\AffiliateRedirectController;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\DestinationController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LegalController;
+use App\Http\Controllers\RegionController;
+use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\TripPlannerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('home.about');
+Route::get('/privacy-policy', [LegalController::class, 'privacy'])->name('privacy');
+Route::get('/affiliate-disclosure', [LegalController::class, 'affiliateDisclosure'])->name('affiliate-disclosure');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
 // Destinations
 Route::get('/destinations', [DestinationController::class, 'index'])->name('destinations.index');
@@ -41,13 +46,13 @@ Route::get('dashboard', DashboardController::class)->middleware(['auth', 'verifi
 // Admin Routes
 Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::get('/places', [PlaceController::class, 'index'])->name('admin.places.index');
-    
+
     // Region routes
     Route::post('/places/regions', [PlaceController::class, 'storeRegion'])->name('admin.places.regions.store');
     Route::put('/places/regions/order', [PlaceController::class, 'reorderRegions'])->name('admin.places.regions.reorder');
     Route::put('/places/regions/{region}', [PlaceController::class, 'updateRegion'])->name('admin.places.regions.update');
     Route::delete('/places/regions/{region}', [PlaceController::class, 'destroyRegion'])->name('admin.places.regions.destroy');
-    
+
     // Destination routes
     Route::post('/places/destinations', [PlaceController::class, 'storeDestination'])->name('admin.places.destinations.store');
     Route::put('/places/destinations/{destination}', [PlaceController::class, 'updateDestination'])->name('admin.places.destinations.update');

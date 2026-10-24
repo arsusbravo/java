@@ -231,6 +231,7 @@
                 </li>
             @endforeach
         </ol>
+        @include('front.partials.affiliate-note', ['class' => 'mt-8 text-center print:hidden'])
 
         @if($articles->isNotEmpty())
             <section class="mt-16 print:hidden" aria-labelledby="read-before-heading">

@@ -66,7 +66,7 @@ test('nearby places come after where to stay', function () {
     ]);
 
     $this->get('/destinations/' . $this->jakarta->region->slug . '/jakarta')
-        ->assertSeeInOrder(['Where to Stay', 'Hotel Indonesia', 'Nearby Places', 'Place at 2 km']);
+        ->assertSeeInOrder(['Where to Stay in Jakarta', 'Hotel Indonesia', 'Nearby Places', 'Place at 2 km']);
 });
 
 test('the section is hidden when the destination has no coordinates', function () {

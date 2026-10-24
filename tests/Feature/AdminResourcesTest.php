@@ -32,6 +32,7 @@ beforeEach(function () {
     Tag::create(['name' => 'Sunrise', 'slug' => 'sunrise']);
     Image::create(['imageable_type' => Destination::class, 'imageable_id' => $destination->id, 'path' => 'images/sunrise.png']);
     AffiliateClick::create(['clickable_type' => Tour::class, 'clickable_id' => $tour->id, 'ip_address' => '127.0.0.1', 'clicked_at' => now()]);
+    Review::create(['reviewable_type' => Tour::class, 'reviewable_id' => $tour->id, 'user_name' => 'Ayu', 'user_email' => 'ayu@example.com', 'rating' => 5, 'status' => 'approved']);
 });
 
 test('guests cannot reach the admin', function () {
@@ -52,7 +53,7 @@ test('every resource list renders with search and filters', function (string $ke
             ->where('resource.key', $key)
             ->has('records.data'));
 
-    $this->get("/admin/{$key}?" . http_build_query(['search' => 'a', 'sort' => 'id', 'direction' => 'asc', ...$filters]))
+    $this->get("/admin/{$key}?".http_build_query(['search' => 'a', 'sort' => 'id', 'direction' => 'asc', ...$filters]))
         ->assertOk();
 })->with(fn () => Admin::keys());
 
@@ -77,7 +78,7 @@ test('every editable resource has working create and edit forms', function (stri
 test('unknown resources and read-only writes are rejected', function () {
     $this->get('/admin/secrets')->assertNotFound();
     $this->post('/admin/affiliate-clicks', [])->assertNotFound();
-    $this->get('/admin/affiliate-clicks/' . AffiliateClick::first()->id . '/edit')->assertNotFound();
+    $this->get('/admin/affiliate-clicks/'.AffiliateClick::first()->id.'/edit')->assertNotFound();
 });
 
 test('creating an article saves relations, uploads and a generated slug', function () {
@@ -302,7 +303,7 @@ test('slugs and emails are limited to 191 characters, the longest that old Maria
     $this->post('/admin/tags', ['name' => 'Long', 'slug' => str_repeat('a', 192)])->assertSessionHasErrors('slug');
     $this->post('/admin/tags', ['name' => 'Long', 'slug' => str_repeat('a', 191)])->assertSessionHasNoErrors();
 
-    $this->post('/admin/users', ['name' => 'X', 'email' => str_repeat('a', 180) . '@example.com', 'password' => 'secret-pass'])
+    $this->post('/admin/users', ['name' => 'X', 'email' => str_repeat('a', 180).'@example.com', 'password' => 'secret-pass'])
         ->assertSessionHasErrors('email');
 });
 
@@ -327,7 +328,7 @@ test('only columns marked toggleable can be switched', function () {
 
     $this->post("/admin/destinations/{$destination->id}/toggle/name")->assertNotFound();          // not a yes/no column
     $this->post("/admin/destinations/{$destination->id}/toggle/views_count")->assertNotFound();
-    $this->post('/admin/images/' . Image::first()->id . '/toggle/is_featured')->assertNotFound();    // not enabled there
+    $this->post('/admin/images/'.Image::first()->id.'/toggle/is_featured')->assertNotFound();    // not enabled there
     $this->post('/admin/destinations/999999/toggle/is_featured')->assertNotFound();
 
     auth()->logout();

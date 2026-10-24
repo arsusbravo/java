@@ -32,7 +32,6 @@ class DatabaseSeeder extends Seeder
             DestinationSeeder::class,
             DestinationTypeSeeder::class,
             ArticleSeeder::class,
-            ReviewSeeder::class,
             AffiliateNetworkSeeder::class,
         ]);
     }

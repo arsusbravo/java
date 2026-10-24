@@ -45,7 +45,7 @@ class ArticleController extends Controller
             'ctaTitle' => 'Share Your Java Story',
             'ctaDescription' => 'Have an amazing Java experience to share? We\'d love to feature your story on our platform',
             'ctaButton' => 'Submit Your Story',
-            'ctaLink' => route('home.about') . '#contact',
+            'ctaLink' => route('home.about').'#contact',
         ];
 
         return view('front.pages.articles', array_merge(compact('articles', 'featuredArticles', 'destinations'), $pageData));
@@ -82,10 +82,17 @@ class ArticleController extends Controller
             'ctaTitle' => 'Need a Custom Itinerary?',
             'ctaDescription' => 'Let us help you plan the perfect Java adventure tailored to your interests and schedule',
             'ctaButton' => 'Contact Us',
-            'ctaLink' => route('home.about') . '#contact',
+            'ctaLink' => route('home.about').'#contact',
         ];
 
-        return view('front.pages.articles', array_merge(compact('articles', 'featuredArticles', 'destinations'), $pageData));
+        // Real counts for the hero; zeros are left out
+        $planStats = array_filter([
+            'Destinations' => $destinations->count(),
+            'Itineraries' => Article::published()->where('article_type', 'itinerary')->count(),
+            'Travel Tips' => Article::published()->where('article_type', 'tips')->count(),
+        ]);
+
+        return view('front.pages.articles', array_merge(compact('articles', 'featuredArticles', 'destinations', 'planStats'), $pageData));
     }
 
     public function guides(Request $request)
@@ -115,10 +122,10 @@ class ArticleController extends Controller
             'heroDescription' => 'Comprehensive guides and the latest travel news to help you explore Java Island like a local',
             'ctaPrimary' => 'Explore Guides',
             'ctaSecondary' => 'Featured Guides',
-            'ctaTitle' => 'Want More Detailed Guides?',
-            'ctaDescription' => 'Subscribe to our newsletter for in-depth travel guides, exclusive tips, and the latest Java travel news',
-            'ctaButton' => 'Subscribe Now',
-            'ctaLink' => route('home') . '#newsletter',
+            'ctaTitle' => 'Ready to Plan Your Trip?',
+            'ctaDescription' => 'Pick a starting point and your interests, and get a day-by-day itinerary with a place to stay every night',
+            'ctaButton' => 'Build my itinerary',
+            'ctaLink' => route('trip-planner'),
         ];
 
         return view('front.pages.articles', array_merge(compact('articles', 'featuredArticles', 'destinations'), $pageData));
@@ -141,9 +148,9 @@ class ArticleController extends Controller
         // Get related articles (same type or same destinations)
         $relatedArticles = Article::published()
             ->where('id', '!=', $article->id)
-            ->where(function($query) use ($article) {
+            ->where(function ($query) use ($article) {
                 $query->where('article_type', $article->article_type)
-                    ->orWhereHas('destinations', function($q) use ($article) {
+                    ->orWhereHas('destinations', function ($q) use ($article) {
                         $q->whereIn('destinations.id', $article->destinations->pluck('id'));
                     });
             })

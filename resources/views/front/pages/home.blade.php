@@ -67,10 +67,4 @@
 <!-- Latest Articles - Magazine Style -->
 @include('front.pages.sections.lastArticles')
 
-<!-- Testimonials -->
-@include('front.pages.sections.testimonials')
-
-<!-- Newsletter Section -->
-@include('front.pages.sections.newsletter')
-
 @endsection

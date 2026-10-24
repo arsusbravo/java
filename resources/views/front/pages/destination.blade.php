@@ -80,7 +80,7 @@
     <section class="mb-16">
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h2 class="text-3xl font-bold">Where to Stay</h2>
+                <h2 class="text-3xl font-bold">Where to Stay in {{ $destination->name }}</h2>
                 @if($accommodations->contains(fn ($accommodation) => isset($accommodation->distance_km)))
                     <p class="mt-1 text-gray-600">Including top-rated stays near {{ $destination->name }}</p>
                 @endif
@@ -129,6 +129,7 @@
             </div>
             @endforeach
         </div>
+        @include('front.partials.affiliate-note')
     </section>
     @endif
 
@@ -195,6 +196,7 @@
             </div>
             @endforeach
         </div>
+        @include('front.partials.affiliate-note')
     </section>
     @endif
 
@@ -265,6 +267,9 @@
             </div>
             @endforeach
         </div>
+        @if($restaurants->contains(fn ($restaurant) => $restaurant->affiliate_url))
+            @include('front.partials.affiliate-note')
+        @endif
     </section>
     @endif
 

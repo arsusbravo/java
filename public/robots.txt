@@ -1,3 +1,5 @@
 User-agent: *
 Disallow: /go/
 Disallow: /admin/
+
+Sitemap: https://javasunrise.com/sitemap.xml
