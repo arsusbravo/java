@@ -28,6 +28,7 @@ Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/destinations', [DestinationController::class, 'index'])->name('destinations.index');
 Route::get('/destinations/{region}', [RegionController::class, 'show'])->name('destinations.region');
 Route::get('/destinations/{region}/{slug}', [DestinationController::class, 'show'])->name('destinations.show');
+Route::get('/destinations/{region}/{slug}/hotels', [DestinationController::class, 'hotels'])->name('destinations.hotels');
 
 Route::get('/trip-planner', [TripPlannerController::class, 'show'])->name('trip-planner');
 Route::get('/restaurants/{slug}', [RestaurantController::class, 'show'])->name('restaurants.show');

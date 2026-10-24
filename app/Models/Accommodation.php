@@ -4,9 +4,10 @@ namespace App\Models;
 
 use App\Models\Concerns\HasAffiliateLink;
 use App\Models\Concerns\HasFeaturedImage;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Support\Geo;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Accommodation extends Model
@@ -116,15 +117,30 @@ class Accommodation extends Model
     // Helper Methods
 
     /**
+     * Star rating between $min and $max (either may be null for no limit).
+     * Unrated homestays and guesthouses count as budget stays: they match
+     * when there is no minimum and the maximum is 3 stars or lower.
+     */
+    public function scopeStarRange(Builder $query, ?int $min, ?int $max): Builder
+    {
+        return $query
+            ->when($min !== null, fn ($query) => $query->where('star_rating', '>=', $min))
+            ->when($max !== null, fn ($query) => $query->where(fn ($query) => $query
+                ->where('star_rating', '<=', $max)
+                ->when($max <= 3 && $min === null, fn ($query) => $query->orWhereNull('star_rating'))));
+    }
+
+    /**
      * Published, active hotels near a point, each with a `distance_km` attribute.
      * Searches the smallest radius that has enough hotels (up to the largest),
      * then ranks them by star rating, highest first, and distance for equal ratings.
      *
      * @param  array<int>  $except  IDs to leave out, e.g. hotels already shown
      * @param  array{0: ?int, 1: ?int}|null  $stars  Star range [min, max]; a null max of 3
-     *                                              or lower also allows unrated places
+     *                                               or lower also allows unrated places
+     * @param  bool  $closestFirst  Rank by distance only, to get the closest hotels
      */
-    public static function nearest(float $lat, float $lng, int $limit, array $except = [], array $with = [], ?array $stars = null): Collection
+    public static function nearest(float $lat, float $lng, int $limit, array $except = [], array $with = [], ?array $stars = null, bool $closestFirst = false): Collection
     {
         [$minStars, $maxStars] = $stars ?? [null, null];
 
@@ -137,15 +153,13 @@ class Accommodation extends Model
                 ->whereBetween('latitude', [$minLat, $maxLat])
                 ->whereBetween('longitude', [$minLng, $maxLng])
                 ->whereNotIn('id', $except)
-                ->when($minStars !== null, fn ($query) => $query->where('star_rating', '>=', $minStars))
-                ->when($maxStars !== null, fn ($query) => $query->where(fn ($query) => $query
-                    ->where('star_rating', '<=', $maxStars)
-                    // Unrated homestays and guesthouses belong with budget stays
-                    ->when($maxStars <= 3 && $minStars === null, fn ($query) => $query->orWhereNull('star_rating'))))
+                ->starRange($minStars, $maxStars)
                 ->get()
                 ->each(fn ($hotel) => $hotel->distance_km = Geo::distanceKm($lat, $lng, (float) $hotel->latitude, (float) $hotel->longitude))
                 ->filter(fn ($hotel) => $hotel->distance_km <= $radius)
-                ->sortBy([
+                ->sortBy($closestFirst ? [
+                    fn ($a, $b) => $a->distance_km <=> $b->distance_km,
+                ] : [
                     fn ($a, $b) => ($b->star_rating ?? 0) <=> ($a->star_rating ?? 0),
                     fn ($a, $b) => $a->distance_km <=> $b->distance_km,
                 ]);
@@ -158,7 +172,6 @@ class Accommodation extends Model
 
         return new Collection;
     }
-
 
     public function incrementViews()
     {

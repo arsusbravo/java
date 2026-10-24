@@ -30,9 +30,13 @@ class SitemapController extends Controller
         $regions = Region::ordered()->get()
             ->map(fn ($region) => ['loc' => route('destinations.region', $region->slug), 'lastmod' => $region->updated_at]);
 
-        $destinations = Destination::with('region:id,slug')->orderBy('id')->get(['id', 'region_id', 'slug', 'updated_at'])
+        $destinations = Destination::with('region:id,slug')->orderBy('id')->get(['id', 'region_id', 'slug', 'latitude', 'updated_at'])
             ->filter(fn ($destination) => $destination->region)
-            ->map(fn ($destination) => ['loc' => route('destinations.show', [$destination->region->slug, $destination->slug]), 'lastmod' => $destination->updated_at]);
+            ->flatMap(fn ($destination) => array_filter([
+                ['loc' => route('destinations.show', [$destination->region->slug, $destination->slug]), 'lastmod' => $destination->updated_at],
+                // Hotels pages are only useful where nearby hotels can be found
+                $destination->latitude !== null ? ['loc' => route('destinations.hotels', [$destination->region->slug, $destination->slug]), 'lastmod' => null] : null,
+            ]));
 
         $articles = Article::published()->orderBy('id')->get(['id', 'slug', 'updated_at'])
             ->map(fn ($article) => ['loc' => $article->url(), 'lastmod' => $article->updated_at]);
