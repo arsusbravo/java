@@ -68,7 +68,7 @@
         IP address to Google. See <a href="https://policies.google.com/privacy" rel="noopener" target="_blank">Google's privacy policy</a>.
     </li>
     <li>
-        <strong>Google Maps.</strong> Restaurant pages show an embedded Google map. Google receives your IP address
+        <strong>Google Maps.</strong> Restaurant and hotel pages show an embedded Google map. Google receives your IP address
         and may set its own cookies when the map loads.
     </li>
     <li>

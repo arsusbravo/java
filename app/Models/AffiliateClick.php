@@ -17,6 +17,7 @@ class AffiliateClick extends Model
         'trip_planner' => 'Trip Planner',
         'article' => 'Article',
         'restaurant' => 'Restaurant page',
+        'hotel' => 'Hotel page',
         'other' => 'Other',
     ];
 

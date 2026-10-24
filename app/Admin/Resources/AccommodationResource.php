@@ -5,6 +5,7 @@ namespace App\Admin\Resources;
 use App\Admin\Column;
 use App\Admin\Field;
 use App\Models;
+use Illuminate\Database\Eloquent\Model;
 
 class AccommodationResource extends ListingResource
 {
@@ -59,6 +60,11 @@ class AccommodationResource extends ListingResource
     }
 
     public static array $with = ['images', 'affiliateNetwork'];
+
+    public function publicUrl(Model $model): ?string
+    {
+        return $model->status === 'published' && $model->is_active ? $model->url() : null;
+    }
 
     public function filters(): array
     {

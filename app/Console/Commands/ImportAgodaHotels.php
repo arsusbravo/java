@@ -16,7 +16,8 @@ class ImportAgodaHotels extends Command
     protected $signature = 'agoda:import
         {file=storage/app/private/hotels/agoda/hotels.xlsx : Agoda hotel feed (.xlsx)}
         {--status=published : Status for newly imported hotels (draft or published)}
-        {--limit= : Only import the first N rows}';
+        {--limit= : Only import the first N rows}
+        {--facts : Only fill check-in/out times, rooms, years and chain of existing hotels; change nothing else}';
 
     protected $description = 'Import or update hotels, photos and affiliate links from an Agoda feed';
 
@@ -65,6 +66,7 @@ class ImportAgodaHotels extends Command
     protected const FEED_COLUMNS = [
         'name', 'type', 'description', 'short_description', 'address',
         'latitude', 'longitude', 'star_rating', 'affiliate_link', 'updated_at',
+        'check_in_time', 'check_out_time', 'room_count', 'year_opened', 'year_renovated', 'chain_name',
     ];
 
     protected const CHUNK = 500;
@@ -103,6 +105,10 @@ class ImportAgodaHotels extends Command
             $this->warn('The Agoda network has no affiliate ID yet; links will work once it is set in the admin.');
         }
 
+        if ($this->option('facts')) {
+            return $this->importFacts($file);
+        }
+
         $this->destinations = Destination::whereIn('slug', self::CITY_DESTINATIONS)->pluck('id', 'slug')->all();
         $this->slugs = Accommodation::pluck('slug')->flip()->map(fn () => true)->all();
 
@@ -135,6 +141,69 @@ class ImportAgodaHotels extends Command
         $this->table(['Created', 'Updated', 'Skipped', 'Photos', 'Linked to destinations'], [array_values($this->stats)]);
 
         return self::SUCCESS;
+    }
+
+    /**
+     * --facts: update only the hotel facts, for hotels that are already imported.
+     */
+    protected function importFacts(string $file): int
+    {
+        $limit = $this->option('limit') ? (int) $this->option('limit') : null;
+        $updated = 0;
+
+        foreach ($this->rows($file) as $index => $row) {
+            if ($limit !== null && $index >= $limit) {
+                break;
+            }
+            if (blank($row['hotel_id'] ?? null)) {
+                continue;
+            }
+
+            $updated += DB::table('accommodations')
+                ->where('affiliate_network_id', $this->network->id)
+                ->where('external_id', (string) $row['hotel_id'])
+                ->update([
+                    'check_in_time' => $this->time($row['checkin'] ?? null),
+                    'check_out_time' => $this->time($row['checkout'] ?? null),
+                    'room_count' => $this->number($row['numberrooms'] ?? null, 1, 5000),
+                    'year_opened' => $this->number($row['yearopened'] ?? null, 1800, (int) date('Y')),
+                    'year_renovated' => $this->number($row['yearrenovated'] ?? null, 1800, (int) date('Y')),
+                    'chain_name' => $this->chain($row['chain_name'] ?? null),
+                ]);
+        }
+
+        $this->info("Hotel facts updated for {$updated} hotels.");
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * "14:00" from a feed time, which comes as a spreadsheet time or text.
+     */
+    protected function time(mixed $value): ?string
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('H:i');
+        }
+
+        return is_string($value) && preg_match('/^(\d{1,2}):(\d{2})/', trim($value), $match) && (int) $match[1] < 24
+            ? sprintf('%02d:%s', $match[1], $match[2])
+            : null;
+    }
+
+    protected function number(mixed $value, int $min, int $max): ?int
+    {
+        return is_numeric($value) && (int) $value >= $min && (int) $value <= $max ? (int) $value : null;
+    }
+
+    /**
+     * The chain name, unless Agoda files the hotel under "No chain".
+     */
+    protected function chain(mixed $value): ?string
+    {
+        $name = trim((string) $value);
+
+        return $name === '' || preg_match('/^(no chain|none|independent)/i', $name) ? null : Str::limit($name, 100, '');
     }
 
     /**
@@ -202,7 +271,13 @@ class ImportAgodaHotels extends Command
                     'latitude' => is_numeric($row['latitude'] ?? null) ? (float) $row['latitude'] : null,
                     'longitude' => is_numeric($row['longitude'] ?? null) ? (float) $row['longitude'] : null,
                     'star_rating' => is_numeric($row['star_rating'] ?? null) && $row['star_rating'] >= 1 ? (int) floor($row['star_rating']) : null,
-                    'affiliate_link' => self::LINK . $hotelId,
+                    'affiliate_link' => self::LINK.$hotelId,
+                    'check_in_time' => $this->time($row['checkin'] ?? null),
+                    'check_out_time' => $this->time($row['checkout'] ?? null),
+                    'room_count' => $this->number($row['numberrooms'] ?? null, 1, 5000),
+                    'year_opened' => $this->number($row['yearopened'] ?? null, 1800, (int) date('Y')),
+                    'year_renovated' => $this->number($row['yearrenovated'] ?? null, 1800, (int) date('Y')),
+                    'chain_name' => $this->chain($row['chain_name'] ?? null),
                     'status' => $this->option('status'),
                     'is_active' => true,
                     'created_at' => $now,

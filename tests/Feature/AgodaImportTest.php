@@ -13,11 +13,12 @@ use OpenSpout\Writer\XLSX\Writer;
  */
 function agodaFeed(array $hotels): string
 {
-    $path = storage_path('framework/testing/agoda-' . uniqid() . '.xlsx');
+    $path = storage_path('framework/testing/agoda-'.uniqid().'.xlsx');
     @mkdir(dirname($path), 0755, true);
 
     $columns = ['hotel_id', 'hotel_name', 'addressline1', 'city', 'state', 'star_rating', 'longitude', 'latitude',
-        'photo1', 'photo2', 'photo3', 'photo4', 'photo5', 'overview', 'accommodation_type'];
+        'photo1', 'photo2', 'photo3', 'photo4', 'photo5', 'overview', 'accommodation_type',
+        'checkin', 'checkout', 'numberrooms', 'yearopened', 'yearrenovated', 'chain_name'];
 
     $writer = new Writer;
     $writer->openToFile($path);
@@ -68,7 +69,7 @@ test('hotels are imported with mapped fields, photos and affiliate links', funct
         agodaHotel(['hotel_id' => 'None']),
     ]);
 
-    $this->artisan('agoda:import', ['file' => str_replace(base_path() . '/', '', $file)])
+    $this->artisan('agoda:import', ['file' => str_replace(base_path().'/', '', $file)])
         ->assertSuccessful();
 
     $hotel = Accommodation::where('external_id', '255678')->firstOrFail();
@@ -99,7 +100,7 @@ test('hotels are imported with mapped fields, photos and affiliate links', funct
 });
 
 test('changing the affiliate id updates every link', function () {
-    $this->artisan('agoda:import', ['file' => str_replace(base_path() . '/', '', agodaFeed([agodaHotel()]))])->assertSuccessful();
+    $this->artisan('agoda:import', ['file' => str_replace(base_path().'/', '', agodaFeed([agodaHotel()]))])->assertSuccessful();
 
     $this->agoda->update(['affiliate_id' => '5550001']);
 
@@ -108,7 +109,7 @@ test('changing the affiliate id updates every link', function () {
 });
 
 test('re-importing updates feed data but keeps admin edits and uploads', function () {
-    $file = fn ($hotel) => str_replace(base_path() . '/', '', agodaFeed([$hotel]));
+    $file = fn ($hotel) => str_replace(base_path().'/', '', agodaFeed([$hotel]));
     $this->artisan('agoda:import', ['file' => $file(agodaHotel())])->assertSuccessful();
 
     $hotel = Accommodation::firstOrFail();
@@ -134,7 +135,7 @@ test('re-importing updates feed data but keeps admin edits and uploads', functio
 });
 
 test('hotels in destination cities appear on the destination page with a booking link', function () {
-    $this->artisan('agoda:import', ['file' => str_replace(base_path() . '/', '', agodaFeed([agodaHotel(['city' => 'Surakarta'])]))])
+    $this->artisan('agoda:import', ['file' => str_replace(base_path().'/', '', agodaFeed([agodaHotel(['city' => 'Surakarta'])]))])
         ->assertSuccessful();
 
     $solo = Destination::where('slug', 'solo')->with('region')->firstOrFail();
@@ -142,13 +143,13 @@ test('hotels in destination cities appear on the destination page with a booking
     $this->get("/destinations/{$solo->region->slug}/solo")
         ->assertOk()
         ->assertSee('Hotel Tugu Malang')
-        ->assertSee('/go/hotel/' . Accommodation::where('external_id', '255678')->value('id') . '?from=destination', false)
+        ->assertSee('/go/hotel/'.Accommodation::where('external_id', '255678')->value('id').'?from=destination', false)
         ->assertSee('Resort')
         ->assertDontSee('/night');
 });
 
 test('duplicate names get a unique slug', function () {
-    $file = str_replace(base_path() . '/', '', agodaFeed([
+    $file = str_replace(base_path().'/', '', agodaFeed([
         agodaHotel(['hotel_id' => 1, 'hotel_name' => 'OYO 101']),
         agodaHotel(['hotel_id' => 2, 'hotel_name' => 'OYO 101']),
     ]));
@@ -157,3 +158,40 @@ test('duplicate names get a unique slug', function () {
 
     expect(Accommodation::orderBy('external_id')->pluck('slug')->all())->toBe(['oyo-101', 'oyo-101-2']);
 });
+
+test('hotel facts are imported with the hotel', function () {
+    $this->artisan('agoda:import', ['file' => feedPath([agodaHotel([
+        'checkin' => '14:00', 'checkout' => '12:00', 'numberrooms' => 48, 'yearopened' => 1932, 'yearrenovated' => 2019, 'chain_name' => 'Tugu Hotels',
+    ])])])->assertSuccessful();
+
+    expect(Accommodation::sole()->only(['check_in_time', 'check_out_time', 'room_count', 'year_opened', 'year_renovated', 'chain_name']))->toBe([
+        'check_in_time' => '14:00', 'check_out_time' => '12:00', 'room_count' => 48, 'year_opened' => 1932, 'year_renovated' => 2019, 'chain_name' => 'Tugu Hotels',
+    ]);
+});
+
+test('--facts only fills the facts and leaves admin edits alone', function () {
+    $this->artisan('agoda:import', ['file' => feedPath([agodaHotel()])])->assertSuccessful();
+    $hotel = Accommodation::sole();
+    $hotel->update(['name' => 'Renamed in the admin', 'description' => 'Own text']);
+
+    $this->artisan('agoda:import', ['file' => feedPath([agodaHotel([
+        'hotel_name' => 'Feed name', 'checkin' => '9:30', 'checkout' => 'noon', 'numberrooms' => 99999, 'yearopened' => 1700, 'chain_name' => 'No Chain',
+    ]), agodaHotel(['hotel_id' => 999, 'hotel_name' => 'Not imported yet'])]), '--facts' => true])
+        ->expectsOutputToContain('Hotel facts updated for 1 hotels')
+        ->assertSuccessful();
+
+    $hotel->refresh();
+    expect($hotel->name)->toBe('Renamed in the admin')
+        ->and($hotel->description)->toBe('Own text')
+        ->and($hotel->check_in_time)->toBe('09:30')
+        ->and($hotel->check_out_time)->toBeNull()          // not a time
+        ->and($hotel->room_count)->toBeNull()              // impossible
+        ->and($hotel->year_opened)->toBeNull()             // impossible
+        ->and($hotel->chain_name)->toBeNull()              // "No Chain"
+        ->and(Accommodation::count())->toBe(1);
+});
+
+function feedPath(array $hotels): string
+{
+    return str_replace(base_path().'/', '', agodaFeed($hotels));
+}

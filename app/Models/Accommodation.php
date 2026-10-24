@@ -58,6 +58,12 @@ class Accommodation extends Model
         'includes_breakfast',
         'free_wifi',
         'prices_checked_at',
+        'check_in_time',
+        'check_out_time',
+        'room_count',
+        'year_opened',
+        'year_renovated',
+        'chain_name',
     ];
 
     protected $casts = [
@@ -185,6 +191,14 @@ class Accommodation extends Model
         }
 
         return new Collection;
+    }
+
+    /**
+     * The hotel's own page on the site.
+     */
+    public function url(): string
+    {
+        return route('hotels.show', $this->slug);
     }
 
     public function incrementViews()

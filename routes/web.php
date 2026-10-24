@@ -1,6 +1,7 @@
 <?php
 
 use App\Admin\Admin;
+use App\Http\Controllers\AccommodationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PlaceController;
 use App\Http\Controllers\Admin\ResourceController;
@@ -32,6 +33,7 @@ Route::get('/destinations/{region}/{slug}/hotels', [DestinationController::class
 
 Route::get('/trip-planner', [TripPlannerController::class, 'show'])->name('trip-planner');
 Route::get('/restaurants/{slug}', [RestaurantController::class, 'show'])->name('restaurants.show');
+Route::get('/hotels/{slug}', [AccommodationController::class, 'show'])->name('hotels.show');
 
 // Booking links: record the click, then go to the partner site
 Route::get('/go/{type}/{id}', AffiliateRedirectController::class)

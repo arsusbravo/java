@@ -6,7 +6,6 @@ use App\Models\Destination;
 use App\Models\Restaurant;
 use App\Models\Review;
 use App\Models\User;
-use App\Support\Geo;
 use Database\Seeders\DatabaseSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -46,7 +45,7 @@ test('a restaurant has its own page with everything a visitor needs', function (
         ->assertSee('tel:+62216915531', false)
         ->assertSee('maps.google.com/maps?q=-6.13437296,106.81272995', false)
         ->assertSee('Get directions')
-        ->assertSee('/go/restaurant/' . $this->restaurant->id . '?from=restaurant', false)
+        ->assertSee('/go/restaurant/'.$this->restaurant->id.'?from=restaurant', false)
         ->assertSeeInOrder(['Home', $this->jakarta->region->name, 'Jakarta', 'Café Batavia']);
 
     // Structured data for search engines
@@ -99,7 +98,7 @@ test('places, hotels and other restaurants nearby are suggested', function () {
         ->assertSee('Near Café Batavia')
         ->assertSee('Jakarta')
         ->assertSee('Hotel near the square')
-        ->assertSee('/go/hotel/' . $hotel->id . '?from=restaurant', false)
+        ->assertSee('/go/hotel/'.$hotel->id.'?from=restaurant', false)
         ->assertSee('More places to eat nearby')
         ->assertSee($other->url(), false);
 });
@@ -123,8 +122,18 @@ test('restaurant cards and the admin link to the page', function () {
 
 test('booking clicks from the restaurant page are recorded as such', function () {
     $this->withHeaders(['User-Agent' => 'Mozilla/5.0 (Macintosh) Chrome/130.0 Safari/537.36'])
-        ->get('/go/restaurant/' . $this->restaurant->id . '?from=restaurant')
+        ->get('/go/restaurant/'.$this->restaurant->id.'?from=restaurant')
         ->assertRedirect('https://partner.example/cafe-batavia');
 
     expect(AffiliateClick::sole()->source)->toBe('restaurant');
+});
+
+test('restaurant photos open in the lightbox', function () {
+    foreach (range(1, 3) as $i) {
+        App\Models\Image::create(['imageable_type' => Restaurant::class, 'imageable_id' => $this->restaurant->id, 'path' => "https://pix.example/r{$i}.jpg", 'order' => $i]);
+    }
+
+    $this->get('/restaurants/cafe-batavia')
+        ->assertSee('href="https://pix.example/r2.jpg" data-lightbox="restaurant"', false)
+        ->assertSee('<dialog id="lightbox"', false);
 });

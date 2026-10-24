@@ -16,7 +16,7 @@
     $wifi = $offer?->wifi ?? $accommodation->free_wifi;
 @endphp
 <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
-    <div class="relative h-48 bg-cover bg-center" style="background-image: url('{{ $accommodation->featured_image_url }}');">
+    <a href="{{ $accommodation->url() }}{{ $stay ? '?'.http_build_query($stay->query()) : '' }}" class="relative block h-48 bg-cover bg-center" style="background-image: url('{{ $accommodation->featured_image_url }}');" aria-label="{{ $accommodation->name }}" tabindex="-1">
         @isset($accommodation->distance_km)
             <div class="absolute top-4 left-4 bg-white/90 text-gray-800 px-3 py-1 rounded-full text-sm font-medium shadow-sm">
                 {{ distance_label($accommodation->distance_km) }} away
@@ -28,9 +28,9 @@
         @if($price && $discount)
             <div class="absolute bottom-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">−{{ $discount }}%</div>
         @endif
-    </div>
+    </a>
     <div class="p-4 flex flex-1 flex-col">
-        <h3 class="font-bold text-lg mb-2">{{ $accommodation->name }}</h3>
+        <h3 class="font-bold text-lg mb-2"><a href="{{ $accommodation->url() }}{{ $stay ? '?'.http_build_query($stay->query()) : '' }}" class="hover:text-blue-600">{{ $accommodation->name }}</a></h3>
         <div class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1">
             @if($accommodation->star_rating)
                 <div class="flex items-center text-yellow-400" aria-label="{{ $accommodation->star_rating }}-star property">
@@ -74,11 +74,14 @@
             @else
                 <span class="text-sm text-gray-500">Check prices on {{ $accommodation->affiliateNetwork?->name ?? 'partner site' }}</span>
             @endif
-            @if($accommodation->affiliate_url)
-                <a href="{{ booking_url($accommodation, $from, $stay) }}" target="_blank" rel="nofollow sponsored noopener" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm whitespace-nowrap">
-                    {{ $stay && ! $price ? 'Other dates' : 'Book Now' }}
-                </a>
-            @endif
+            <div class="flex shrink-0 gap-2">
+                <a href="{{ $accommodation->url() }}{{ $stay ? '?'.http_build_query($stay->query()) : '' }}" class="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:border-blue-600 hover:text-blue-600">Details</a>
+                @if($accommodation->affiliate_url)
+                    <a href="{{ booking_url($accommodation, $from, $stay) }}" target="_blank" rel="nofollow sponsored noopener" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm whitespace-nowrap">
+                        {{ $stay && ! $price ? 'Other dates' : 'Book Now' }}
+                    </a>
+                @endif
+            </div>
         </div>
     </div>
 </div>

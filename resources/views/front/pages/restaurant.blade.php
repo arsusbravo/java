@@ -80,8 +80,8 @@
                     <h2 id="photos-heading" class="text-2xl font-bold mb-4">Photos</h2>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                         @foreach($restaurant->images as $image)
-                            <a href="{{ image_url($image->path) }}" target="_blank" rel="noopener" class="block aspect-[4/3] overflow-hidden rounded-lg">
-                                <img src="{{ image_url($image->path) }}" alt="{{ $image->alt_text ?: $restaurant->name }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-300 hover:scale-105">
+                            <a href="{{ image_url($image->path) }}" data-lightbox="restaurant" data-caption="{{ $image->title }}" target="_blank" rel="noopener" class="group block aspect-[4/3] cursor-zoom-in overflow-hidden rounded-lg">
+                                <img src="{{ image_url($image->path) }}" alt="{{ $image->alt_text ?: $restaurant->name }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
                             </a>
                         @endforeach
                     </div>
@@ -210,4 +210,5 @@
         </section>
     @endif
 </div>
+@include('front.partials.lightbox')
 @endsection

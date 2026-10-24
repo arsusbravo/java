@@ -231,7 +231,7 @@
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="h-32 sm:w-44 shrink-0 rounded-xl bg-cover bg-center print:hidden" style="background-image: url('{{ $hotel->featured_image_url }}');" role="img" aria-label="{{ $hotel->name }}"></div>
                                 <div class="flex-1">
-                                    <h3 class="font-bold text-lg">{{ $hotel->name }}</h3>
+                                    <h3 class="font-bold text-lg"><a href="{{ $hotel->url() }}{{ $nightStay ? '?'.http_build_query($nightStay->query()) : '' }}" class="hover:text-java-accent">{{ $hotel->name }}</a></h3>
                                     <p class="text-sm text-gray-600">
                                         @if($hotel->star_rating)<span class="text-yellow-500" aria-label="{{ $hotel->star_rating }} stars">{{ str_repeat('★', $hotel->star_rating) }}</span> · @endif
                                         {{ \App\Models\Accommodation::TYPES[$hotel->type] ?? ucfirst($hotel->type) }}
