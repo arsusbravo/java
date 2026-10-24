@@ -87,6 +87,28 @@
             </div>
         </fieldset>
 
+        <fieldset class="mt-6">
+            <legend class="font-semibold mb-2">When do you travel? <span class="font-normal text-gray-500">Optional: adds real hotel prices for every night</span></legend>
+            <div class="flex flex-wrap gap-4">
+                <label class="block text-sm">
+                    <span class="text-gray-700">First night</span>
+                    <input type="date" name="date" value="{{ $choices['date'] }}" min="{{ today()->toDateString() }}"
+                           class="mt-1 block rounded-lg border border-gray-300 px-4 py-3 focus:border-java-accent focus:ring-2 focus:ring-java-accent/30 outline-none">
+                </label>
+                <label class="block text-sm">
+                    <span class="text-gray-700">Adults</span>
+                    <select name="adults" class="mt-1 block rounded-lg border border-gray-300 px-4 py-3 focus:border-java-accent focus:ring-2 focus:ring-java-accent/30 outline-none">
+                        @foreach(range(1, \App\Support\Agoda\Stay::MAX_ADULTS) as $count)
+                            <option value="{{ $count }}" @selected($choices['adults'] === $count)>{{ $count }}</option>
+                        @endforeach
+                    </select>
+                </label>
+            </div>
+            @if($dateIgnored)
+                <p class="mt-2 text-sm text-red-600" role="alert">That date has passed or isn't valid, so the trip is shown without prices. Pick a date from today.</p>
+            @endif
+        </fieldset>
+
         <button type="submit" class="mt-8 inline-flex items-center gap-2 rounded-full bg-java-accent px-8 py-4 font-semibold text-white shadow-lg transition hover:bg-orange-600">
             {{ $plan ? 'Plan again' : 'Plan my trip' }}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
@@ -101,6 +123,12 @@
                 <span class="rounded-full bg-gray-100 px-4 py-2"><strong>{{ $plan['placeCount'] }}</strong> {{ Str::plural('place', $plan['placeCount']) }}</span>
                 <span class="rounded-full bg-gray-100 px-4 py-2"><strong>{{ $plan['nights'] }}</strong> {{ Str::plural('night', $plan['nights']) }}</span>
                 <span class="rounded-full bg-gray-100 px-4 py-2">≈ <strong>{{ number_format($plan['totalKm']) }}</strong> km on the road</span>
+                @if(! empty($plan['pricedNights']))
+                    <span class="rounded-full bg-orange-100 px-4 py-2 text-orange-900">
+                        Hotels: about <strong>{{ money($plan['hotelTotal'], $plan['currency']) }}</strong>
+                        for {{ $plan['pricedNights'] }} {{ Str::plural('night', $plan['pricedNights']) }}@if($plan['pricedNights'] < $plan['nights']) of {{ $plan['nights'] }}@endif, excl. taxes
+                    </span>
+                @endif
             </div>
             <div class="flex gap-2 print:hidden">
                 <button type="button" id="share-trip" class="inline-flex items-center gap-2 rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium hover:border-java-accent hover:text-java-accent">
@@ -188,9 +216,18 @@
                         </p>
                     @endif
                     @if($day['stay'])
-                        @php $hotel = $day['stay']['hotel']; @endphp
+                        @php
+                            $hotel = $day['stay']['hotel'];
+                            $nightStay = $day['stay']['stay'] ?? null;
+                            $offer = $day['stay']['offer'] ?? null;
+                        @endphp
                         <div class="mt-4 rounded-2xl bg-orange-50 p-5 break-inside-avoid">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-orange-800 mb-3">Tonight's stay</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-orange-800 mb-3">
+                                Tonight's stay @if($nightStay)· {{ $choices['date'] ? \Carbon\CarbonImmutable::parse($choices['date'])->addDays($loop->index)->format('D j M') : '' }}@endif
+                            </p>
+                            @if(! empty($day['stay']['fullHotel']))
+                                <p class="mb-3 text-sm text-gray-600">{{ $day['stay']['fullHotel']->name }} is full that night, so we picked the next best.</p>
+                            @endif
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="h-32 sm:w-44 shrink-0 rounded-xl bg-cover bg-center print:hidden" style="background-image: url('{{ $hotel->featured_image_url }}');" role="img" aria-label="{{ $hotel->name }}"></div>
                                 <div class="flex-1">
@@ -204,9 +241,29 @@
                                             · {{ distance_label($hotel->distance_km) }} from {{ $previous?->name }}
                                         @endif
                                     </p>
+                                    @php $score = $offer?->reviewScore ?? $hotel->review_score; @endphp
+                                    @if($score)
+                                        <p class="mt-1 text-sm" title="Agoda guest rating">
+                                            <span class="rounded bg-blue-900 px-1.5 py-0.5 font-semibold text-white">{{ number_format((float) $score, 1) }}</span>
+                                            {{ rating_label($score) }}
+                                            @if($offer?->reviewCount ?? $hotel->review_count)<span class="text-gray-500">· {{ number_format($offer?->reviewCount ?? $hotel->review_count) }} reviews</span>@endif
+                                        </p>
+                                    @endif
+                                    @if($offer)
+                                        <p class="mt-2 font-bold text-gray-900">
+                                            {{ money($offer->dailyRate, $offer->currency) }} <span class="text-sm font-normal text-gray-600">that night, excl. taxes</span>
+                                            @if($offer->crossedOutRate)<span class="ml-1 text-sm font-normal text-gray-400 line-through">{{ money($offer->crossedOutRate, $offer->currency) }}</span>@endif
+                                        </p>
+                                    @elseif($nightStay)
+                                        <p class="mt-2 text-sm text-gray-600">No live price for that night. Check on {{ $hotel->affiliateNetwork?->name ?? 'the partner site' }}.</p>
+                                    @endif
                                     @if($hotel->affiliate_url)
-                                        <a href="{{ route('go', ['hotel', $hotel->id, 'from' => 'trip_planner']) }}" target="_blank" rel="nofollow sponsored noopener" class="mt-3 inline-block rounded-full bg-java-accent px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600 print:hidden">
-                                            Check prices on {{ $hotel->affiliateNetwork?->name ?? 'partner site' }}
+                                        <a href="{{ booking_url($hotel, 'trip_planner', $nightStay) }}" target="_blank" rel="nofollow sponsored noopener" class="mt-3 inline-block rounded-full bg-java-accent px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600 print:hidden">
+                                            @if($nightStay)
+                                                Book {{ $nightStay->nights() > 1 ? $nightStay->nights().' nights' : 'this night' }} on {{ $hotel->affiliateNetwork?->name ?? 'partner site' }}
+                                            @else
+                                                Check prices on {{ $hotel->affiliateNetwork?->name ?? 'partner site' }}
+                                            @endif
                                         </a>
                                     @endif
                                 </div>
@@ -217,9 +274,10 @@
                                     <ul class="space-y-1.5 text-sm">
                                         @foreach($day['stay']['alternatives'] as $alternative)
                                             <li class="flex flex-wrap items-center justify-between gap-2">
-                                                <span>{{ $alternative->name }} @if($alternative->star_rating)<span class="text-yellow-500">{{ str_repeat('★', $alternative->star_rating) }}</span>@endif <span class="text-gray-500">· {{ distance_label($alternative->distance_km) }}</span></span>
+                                                @php $alternativeOffer = ($day['stay']['alternativeOffers'] ?? collect())->get($alternative->id); @endphp
+                                                <span>{{ $alternative->name }} @if($alternative->star_rating)<span class="text-yellow-500">{{ str_repeat('★', $alternative->star_rating) }}</span>@endif <span class="text-gray-500">· {{ isset($alternative->distance_km) ? distance_label($alternative->distance_km) : '' }}</span>@if($alternativeOffer) <strong class="ml-1">{{ money($alternativeOffer->dailyRate, $alternativeOffer->currency) }}</strong>@endif</span>
                                                 @if($alternative->affiliate_url)
-                                                    <a href="{{ route('go', ['hotel', $alternative->id, 'from' => 'trip_planner']) }}" target="_blank" rel="nofollow sponsored noopener" class="font-medium text-java-accent hover:underline">Check prices</a>
+                                                    <a href="{{ booking_url($alternative, 'trip_planner', $nightStay ? new \App\Support\Agoda\Stay($nightStay->checkIn, $nightStay->checkIn->addDay(), $nightStay->adults) : null) }}" target="_blank" rel="nofollow sponsored noopener" class="font-medium text-java-accent hover:underline">{{ $nightStay ? 'Book' : 'Check prices' }}</a>
                                                 @endif
                                             </li>
                                         @endforeach

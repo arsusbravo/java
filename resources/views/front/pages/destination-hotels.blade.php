@@ -9,7 +9,7 @@
     $hotelsUrl = fn (array $changes) => route('destinations.hotels', [
         $destination->region->slug,
         $destination->slug,
-        ...array_filter([...['budget' => $budget, 'sort' => $sort === 'distance' ? null : $sort], ...$changes]),
+        ...array_filter([...($stay?->query() ?? []), ...['budget' => $budget, 'sort' => $sort === 'distance' ? null : $sort], ...$changes]),
     ]);
 @endphp
 
@@ -50,9 +50,58 @@
         <div class="mb-6 flex flex-wrap items-center gap-x-6 gap-y-2">
             <a href="{{ route('destinations.show', [$destination->region->slug, $destination->slug]) }}" class="text-blue-600 hover:text-blue-800">← Back to {{ $destination->name }}</a>
             @if($hotels->total() > 0)
-                <span class="text-sm text-gray-500">Showing {{ $hotels->firstItem() }}–{{ $hotels->lastItem() }} of {{ $hotels->total() }}</span>
+                <span class="text-sm text-gray-500">
+                    Showing {{ $hotels->firstItem() }}–{{ $hotels->lastItem() }} of {{ $hotels->total() }}@if($stay) · {{ $availableCount }} with rooms for your dates @endif
+                </span>
             @endif
         </div>
+
+        {{-- Dates: live prices and availability from Agoda --}}
+        <form method="GET" action="{{ route('destinations.hotels', [$destination->region->slug, $destination->slug]) }}" class="mb-4 rounded-2xl border border-gray-200 p-4">
+            @if($budget)<input type="hidden" name="budget" value="{{ $budget }}">@endif
+            @if($sort !== 'distance')<input type="hidden" name="sort" value="{{ $sort }}">@endif
+            <div class="grid grid-cols-2 gap-3 md:grid-cols-5 md:items-end">
+                <label class="block text-sm">
+                    <span class="font-semibold text-gray-900">Check-in</span>
+                    <input type="date" name="checkin" value="{{ $stay?->checkIn->toDateString() ?? request('checkin') }}" min="{{ today()->toDateString() }}" required
+                           class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                </label>
+                <label class="block text-sm">
+                    <span class="font-semibold text-gray-900">Check-out</span>
+                    <input type="date" name="checkout" value="{{ $stay?->checkOut->toDateString() ?? request('checkout') }}" min="{{ today()->addDay()->toDateString() }}" required
+                           class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                </label>
+                <label class="block text-sm">
+                    <span class="font-semibold text-gray-900">Adults</span>
+                    <select name="adults" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        @foreach(range(1, \App\Support\Agoda\Stay::MAX_ADULTS) as $count)
+                            <option value="{{ $count }}" @selected(($stay?->adults ?? 2) === $count)>{{ $count }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="block text-sm">
+                    <span class="font-semibold text-gray-900">Children</span>
+                    <select name="children" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        @foreach(range(0, \App\Support\Agoda\Stay::MAX_CHILDREN) as $count)
+                            <option value="{{ $count }}" @selected(($stay?->children ?? 0) === $count)>{{ $count }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <button type="submit" class="col-span-2 rounded-lg bg-java-accent px-5 py-2.5 font-semibold text-white hover:bg-orange-600 md:col-span-1">
+                    {{ $stay ? 'Update prices' : 'Check prices' }}
+                </button>
+            </div>
+            @if($stayError)
+                <p class="mt-3 text-sm text-red-600" role="alert">{{ $stayError }}</p>
+            @elseif($stay)
+                <p class="mt-3 text-sm text-gray-600">
+                    Prices for <strong>{{ $stay->label() }}</strong>, per night, excluding taxes.
+                    <a href="{{ route('destinations.hotels', [$destination->region->slug, $destination->slug, ...array_filter(['budget' => $budget, 'sort' => $sort === 'distance' ? null : $sort])]) }}" class="ml-2 text-blue-600 hover:text-blue-800">Clear dates</a>
+                </p>
+            @else
+                <p class="mt-3 text-sm text-gray-500">Add your dates to see real prices and which hotels still have rooms.</p>
+            @endif
+        </form>
 
         <div class="mb-8 flex flex-col gap-4 rounded-2xl bg-gray-50 p-4 lg:flex-row lg:items-center lg:justify-between">
             <nav class="flex flex-wrap gap-2" aria-label="Filter by budget">
@@ -85,7 +134,7 @@
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($hotels as $accommodation)
-                @include('front.partials.hotel-card', ['from' => 'destination'])
+                @include('front.partials.hotel-card', ['from' => 'destination', 'stay' => $stay])
             @endforeach
         </div>
 

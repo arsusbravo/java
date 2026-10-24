@@ -51,6 +51,9 @@ class AccommodationResource extends ListingResource
             Column::make('name')->sortable(),
             Column::make('type', 'Type', 'badge')->sortable(),
             Column::make('star_rating', 'Stars', 'number')->sortable(),
+            Column::make('review_score', 'Agoda rating', 'number')->sortable(),
+            Column::make('price_from', 'Price (Agoda)')->sortable()->value(fn ($model) => $model->price_from ? money($model->price_from, $model->currency) : null),
+            Column::make('prices_checked_at', 'Price checked', 'date')->sortable(),
             ...$this->statColumns(),
         ];
     }

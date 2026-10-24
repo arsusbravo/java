@@ -6,6 +6,7 @@ use App\Models\Accommodation;
 use App\Models\AffiliateClick;
 use App\Models\Restaurant;
 use App\Models\Tour;
+use App\Support\Agoda\Stay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +56,28 @@ class AffiliateRedirectController extends Controller
             DB::table($listing->getTable())->where('id', $listing->getKey())->increment('clicks_count');
         }
 
-        return redirect()->away($url);
+        return redirect()->away($this->withStay($url, Stay::fromQuery($request->query())));
+    }
+
+    /**
+     * Agoda opens with the visitor's dates and guests already filled in.
+     * Other partners, and invalid dates, get the plain link.
+     */
+    protected function withStay(string $url, ?Stay $stay): string
+    {
+        $host = (string) parse_url($url, PHP_URL_HOST);
+        if (! $stay || ! ($host === 'agoda.com' || str_ends_with($host, '.agoda.com'))) {
+            return $url;
+        }
+
+        return $url.(str_contains($url, '?') ? '&' : '?').http_build_query([
+            'checkin' => $stay->checkIn->toDateString(),
+            'checkout' => $stay->checkOut->toDateString(),
+            'NumberofAdults' => $stay->adults,
+            'NumberofChildren' => $stay->children,
+            'Rooms' => 1,
+            'currency' => config('services.agoda.currency'),
+        ]);
     }
 
     protected function isBot(Request $request): bool
@@ -85,7 +107,7 @@ class AffiliateRedirectController extends Controller
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
             $packed = inet_pton($ip);
 
-            return inet_ntop(substr($packed, 0, 6) . str_repeat("\0", 10));
+            return inet_ntop(substr($packed, 0, 6).str_repeat("\0", 10));
         }
 
         return null;

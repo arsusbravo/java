@@ -183,19 +183,8 @@
         <section class="mb-16" aria-labelledby="stay-nearby-heading">
             <h2 id="stay-nearby-heading" class="text-3xl font-bold mb-8">Stay nearby</h2>
             <div class="grid md:grid-cols-3 gap-6">
-                @foreach($nearbyHotels as $hotel)
-                    <div class="overflow-hidden rounded-lg bg-white shadow-md">
-                        <div class="relative h-40 bg-cover bg-center" style="background-image: url('{{ $hotel->featured_image_url }}');" role="img" aria-label="{{ $hotel->name }}">
-                            <span class="absolute top-3 left-3 rounded-full bg-white/90 px-3 py-1 text-sm font-medium text-gray-800 shadow-sm">{{ distance_label($hotel->distance_km) }} away</span>
-                        </div>
-                        <div class="p-4">
-                            <h3 class="font-bold">{{ $hotel->name }}</h3>
-                            @if($hotel->star_rating)<p class="text-yellow-500" aria-label="{{ $hotel->star_rating }} stars">{{ str_repeat('★', $hotel->star_rating) }}</p>@endif
-                            @if($hotel->affiliate_url)
-                                <a href="{{ route('go', ['hotel', $hotel->id, 'from' => 'restaurant']) }}" target="_blank" rel="nofollow sponsored noopener" class="mt-3 inline-block rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">Book Now</a>
-                            @endif
-                        </div>
-                    </div>
+                @foreach($nearbyHotels as $accommodation)
+                    @include('front.partials.hotel-card', ['from' => 'restaurant'])
                 @endforeach
             </div>
             @include('front.partials.affiliate-note')

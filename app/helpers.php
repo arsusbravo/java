@@ -25,7 +25,7 @@ if (! function_exists('image_url')) {
             }
 
             if (Storage::disk('public')->exists($path)) {
-                return asset('storage/' . $path);
+                return asset('storage/'.$path);
             }
         }
 
@@ -59,6 +59,50 @@ if (! function_exists('distance_label')) {
      */
     function distance_label(float $km): string
     {
-        return $km < 1 ? round($km * 1000, -1) . ' m' : number_format($km, 1) . ' km';
+        return $km < 1 ? round($km * 1000, -1).' m' : number_format($km, 1).' km';
+    }
+}
+
+if (! function_exists('money')) {
+    /**
+     * "€23" / "$23" / "IDR 450,000". Amounts under 10 keep their cents.
+     */
+    function money(float|string|null $amount, ?string $currency): string
+    {
+        $amount = (float) $amount;
+        $symbols = ['EUR' => '€', 'USD' => '$', 'GBP' => '£', 'AUD' => 'A$', 'SGD' => 'S$'];
+        $number = number_format($amount, $amount < 10 && floor($amount) != $amount ? 2 : 0);
+
+        return isset($symbols[$currency]) ? $symbols[$currency].$number : trim("{$currency} {$number}");
+    }
+}
+
+if (! function_exists('rating_label')) {
+    /**
+     * Words for an Agoda guest score out of 10, like Agoda's own.
+     */
+    function rating_label(float|string|null $score): ?string
+    {
+        $score = (float) $score;
+
+        return match (true) {
+            $score >= 9 => 'Exceptional',
+            $score >= 8.5 => 'Excellent',
+            $score >= 8 => 'Very good',
+            $score >= 7 => 'Good',
+            default => null,
+        };
+    }
+}
+
+if (! function_exists('booking_url')) {
+    /**
+     * Tracked booking link (/go) for a listing, with the searched dates when known.
+     */
+    function booking_url(\Illuminate\Database\Eloquent\Model $listing, string $from, ?\App\Support\Agoda\Stay $stay = null): string
+    {
+        $type = array_search($listing::class, \App\Http\Controllers\AffiliateRedirectController::TYPES, true);
+
+        return route('go', [$type, $listing->getKey(), 'from' => $from, ...($stay?->query() ?? [])]);
     }
 }

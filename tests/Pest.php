@@ -13,6 +13,7 @@
 
 pest()->extend(Tests\TestCase::class)
     ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->beforeEach(fn () => Illuminate\Support\Facades\Http::preventStrayRequests())
     ->in('Feature');
 
 /*

@@ -23,7 +23,9 @@
 <p>
     Hotels shown on our pages come from our partners' listings and are selected automatically by location
     (the closest ones to each place) and, in the trip planner, by the budget you pick.
-    Star ratings, photos and prices come from the partner.
+    Star ratings, photos, prices and guest ratings come from the partner. Prices are checked daily (or live when
+    you enter dates), are per night and exclude taxes and fees, and can change: the final price is the one shown
+    on the partner's site.
     A hotel appearing on our site is not a personal recommendation, and we have not stayed at every one of them.
 </p>
 <p>

@@ -6,6 +6,8 @@ use App\Models\Accommodation;
 use App\Models\Destination;
 use App\Models\Region;
 use App\Models\Restaurant;
+use App\Support\Agoda\AgodaClient;
+use App\Support\Agoda\Stay;
 use App\Support\Geo;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -176,7 +178,7 @@ class DestinationController extends Controller
     public const HOTELS_PER_PAGE = 12;
 
     /** Ways to sort the hotels page (`?sort=`). */
-    public const HOTEL_SORTS = ['distance' => 'Closest first', 'stars' => 'Most stars'];
+    public const HOTEL_SORTS = ['distance' => 'Closest first', 'price' => 'Lowest price', 'rating' => 'Best rated', 'stars' => 'Most stars'];
 
     /** Budget groups on the hotels page (`?budget=`), by star range [min, max]. */
     public const HOTEL_BUDGETS = [
@@ -188,7 +190,7 @@ class DestinationController extends Controller
     /**
      * All hotels near a destination: the ones linked to it plus the closest others, up to 50.
      */
-    public function hotels(Request $request, string $regionSlug, string $destinationSlug): View
+    public function hotels(Request $request, string $regionSlug, string $destinationSlug, AgodaClient $agoda): View
     {
         $destination = $this->findDestination($regionSlug, $destinationSlug);
         $hasLocation = $destination->latitude !== null && $destination->longitude !== null;
@@ -224,11 +226,27 @@ class DestinationController extends Controller
             }
         }
 
+        // Dates searched: live prices for those dates, hotels without rooms go last
+        $stay = Stay::fromQuery($request->query());
+        $stayError = ! $stay && ($request->filled('checkin') || $request->filled('checkout'))
+            ? 'Please pick a check-in date from today, and a check-out date 1 to '.Stay::MAX_NIGHTS.' nights later.'
+            : null;
+        if ($stay) {
+            $offers = $agoda->offers($hotels->pluck('external_id')->all(), $stay->checkIn, $stay->checkOut, $stay->adults, $stay->children);
+            $hotels->each(fn (Accommodation $hotel) => $hotel->offer = $offers[(int) $hotel->external_id] ?? null);
+        }
+
         $sort = array_key_exists($request->query('sort'), self::HOTEL_SORTS) ? $request->query('sort') : 'distance';
+        $price = fn (Accommodation $hotel): float => (float) ($stay ? $hotel->offer?->dailyRate : $hotel->price_from) ?: INF;
         $byDistance = fn (Accommodation $a, Accommodation $b): int => ($a->distance_km ?? INF) <=> ($b->distance_km ?? INF);
-        $hotels = $hotels->sort($sort === 'stars'
-            ? fn (Accommodation $a, Accommodation $b): int => (($b->star_rating ?? 0) <=> ($a->star_rating ?? 0)) ?: $byDistance($a, $b)
-            : $byDistance)->values();
+        $bySort = match ($sort) {
+            'stars' => fn (Accommodation $a, Accommodation $b): int => (($b->star_rating ?? 0) <=> ($a->star_rating ?? 0)) ?: $byDistance($a, $b),
+            'price' => fn (Accommodation $a, Accommodation $b): int => ($price($a) <=> $price($b)) ?: $byDistance($a, $b),
+            'rating' => fn (Accommodation $a, Accommodation $b): int => (((float) $b->review_score) <=> ((float) $a->review_score)) ?: $byDistance($a, $b),
+            default => $byDistance,
+        };
+        $hotels = $hotels->sort(fn (Accommodation $a, Accommodation $b): int => ($stay ? (int) ($a->offer === null) <=> (int) ($b->offer === null) : 0) ?: $bySort($a, $b))->values();
+        $availableCount = $stay ? $hotels->whereNotNull('offer')->count() : null;
 
         $farthestKm = $hotels->max('distance_km');
         $page = Paginator::resolveCurrentPage();
@@ -237,7 +255,7 @@ class DestinationController extends Controller
             $hotels->count(),
             self::HOTELS_PER_PAGE,
             $page,
-            ['path' => $request->url(), 'query' => array_filter(['budget' => $budget, 'sort' => $sort === 'distance' ? null : $sort])],
+            ['path' => $request->url(), 'query' => array_filter([...($stay?->query() ?? []), 'budget' => $budget, 'sort' => $sort === 'distance' ? null : $sort])],
         );
 
         abort_if($hotels->isEmpty() && $page > 1, 404);
@@ -250,6 +268,9 @@ class DestinationController extends Controller
             'sorts' => self::HOTEL_SORTS,
             'budget' => $budget,
             'budgets' => self::HOTEL_BUDGETS,
+            'stay' => $stay,
+            'stayError' => $stayError,
+            'availableCount' => $availableCount,
         ]);
     }
 

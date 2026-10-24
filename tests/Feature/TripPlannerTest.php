@@ -36,7 +36,7 @@ function hotelNear(Destination $place, float $km, ?int $stars, array $attributes
 {
     return Accommodation::create([
         'name' => "Hotel {$stars}★ at {$km} km from {$place->name}",
-        'slug' => 'hotel-' . Str::random(8),
+        'slug' => 'hotel-'.Str::random(8),
         'type' => 'hotel',
         'status' => 'published',
         'is_active' => true,
@@ -162,7 +162,7 @@ test('the planner page shows the form, and the trip once a start is chosen', fun
         ->assertOk()
         ->assertSee('Your 3-day trip from Yogyakarta')
         ->assertSeeInOrder(['Day 1', 'Yogyakarta', 'Temple Near', "Tonight's stay", $hotel->name, 'Day 2'])
-        ->assertSee('/go/hotel/' . $hotel->id . '?from=trip_planner', false)
+        ->assertSee('/go/hotel/'.$hotel->id.'?from=trip_planner', false)
         ->assertSee('skip%5B0%5D=temple-near', false)          // "Not for me" link
         ->assertSee('Share this trip');
 });
@@ -180,7 +180,7 @@ test('invalid choices are corrected instead of failing', function () {
 
 test('the plan page and destination pages lead to the planner', function () {
     $this->get('/plan')->assertSee(route('trip-planner'), false)->assertSee('Build my itinerary');
-    $this->get('/destinations/' . $this->yogya->region->slug . '/yogyakarta')->assertSee('trip-planner?start=yogyakarta', false);
+    $this->get('/destinations/'.$this->yogya->region->slug.'/yogyakarta')->assertSee('trip-planner?start=yogyakarta', false);
     $this->get('/')->assertSee('Plan my trip');
 });
 
@@ -190,4 +190,106 @@ test('a night without a partner hotel nearby says so', function () {
     $this->get('/trip-planner?start=jakarta&days=2')
         ->assertOk()
         ->assertSee("We don't have a partner hotel near", false);
+});
+
+/** Agoda answers per night: [check-in date => [agoda hotel id => rate]]. */
+function fakeAgodaNights(array $nights): void
+{
+    config(['services.agoda.url' => 'https://agoda.test/lt_v1', 'services.agoda.api_key' => '1234567:secret', 'services.agoda.currency' => 'EUR']);
+    Illuminate\Support\Facades\Http::fake(['agoda.test/*' => function ($request) use ($nights) {
+        $rates = $nights[$request['criteria']['checkInDate']] ?? [];
+
+        return Illuminate\Support\Facades\Http::response(['results' => collect($rates)
+            ->only($request['criteria']['hotelId'])
+            ->map(fn ($rate, $id) => ['hotelId' => $id, 'currency' => 'EUR', 'dailyRate' => $rate, 'reviewScore' => 8.8, 'reviewCount' => 50])
+            ->values()->all()]);
+    }]);
+}
+
+test('with a start date every night gets its live price, a total and dated booking links', function () {
+    placeNearYogya('Market', 3);
+    placeNearYogya('Museum', 6);
+    placeNearYogya('Garden', 60);
+    placeNearYogya('Lake', 65);
+    $near = hotelNear($this->yogya, 1, 4, ['external_id' => '11']);
+    $far = hotelNear(Destination::where('slug', 'lake')->first(), 1, 4, ['external_id' => '22']);
+    $first = today()->addDays(20);
+    fakeAgodaNights([
+        $first->toDateString() => [11 => 40.0],
+        $first->copy()->addDay()->toDateString() => [22 => 55.5],
+    ]);
+
+    $response = $this->get('/trip-planner?'.http_build_query(['start' => 'yogyakarta', 'days' => 3, 'budget' => 'comfort', 'date' => $first->toDateString(), 'adults' => 2]))->assertOk();
+    $plan = $response->viewData('plan');
+
+    expect($plan['days'][0]['stay']['hotel']->is($near))->toBeTrue()
+        ->and($plan['days'][0]['stay']['offer']->dailyRate)->toBe(40.0)
+        ->and($plan['days'][1]['stay']['hotel']->is($far))->toBeTrue()
+        ->and($plan['hotelTotal'])->toBe(95.5)
+        ->and($plan['pricedNights'])->toBe(2);
+
+    $response->assertSee('Hotels: about')
+        ->assertSee('€96')
+        ->assertSee('that night, excl. taxes')
+        ->assertSee("Tonight's stay · ".$first->format('D j M'), false)
+        ->assertSee('/go/hotel/'.$near->id.'?from=trip_planner&amp;checkin='.$first->toDateString().'&amp;checkout='.$first->copy()->addDay()->toDateString(), false);
+});
+
+test('nights in the same hotel are booked together', function () {
+    placeNearYogya('Market', 3);
+    placeNearYogya('Museum', 6);
+    placeNearYogya('Garden', 9);
+    $hotel = hotelNear($this->yogya, 4, 4, ['external_id' => '11']);
+    $first = today()->addDays(20);
+    fakeAgodaNights([$first->toDateString() => [11 => 40], $first->copy()->addDay()->toDateString() => [11 => 45]]);
+
+    $plan = $this->get('/trip-planner?start=yogyakarta&days=3&date='.$first->toDateString())->viewData('plan');
+
+    expect($plan['days'][1]['stay']['sameAsLastNight'])->toBeTrue()
+        ->and($plan['days'][0]['stay']['stay']->nights())->toBe(2)
+        ->and($plan['days'][1]['stay']['stay']->checkIn->toDateString())->toBe($first->toDateString())
+        ->and($plan['hotelTotal'])->toBe(85.0);
+    $this->get('/trip-planner?start=yogyakarta&days=3&date='.$first->toDateString())->assertSee('Book 2 nights on');
+});
+
+test('a full hotel is swapped for an alternative with rooms', function () {
+    hotelNear($this->yogya, 0.5, 4, ['external_id' => '11']);
+    hotelNear($this->yogya, 0.8, 4, ['external_id' => '22']);
+    $planned = (new TripPlanner)->plan($this->yogya, 2)['days'][0]['stay'];
+    [$full, $open] = [$planned['hotel'], $planned['alternatives']->first()];
+    $first = today()->addDays(20);
+    fakeAgodaNights([$first->toDateString() => [(int) $open->external_id => 61]]);
+
+    $response = $this->get('/trip-planner?start=yogyakarta&days=2&date='.$first->toDateString());
+    $stay = $response->viewData('plan')['days'][0]['stay'];
+
+    expect($stay['hotel']->is($open))->toBeTrue()
+        ->and($stay['fullHotel']->is($full))->toBeTrue()
+        ->and($stay['offer']->dailyRate)->toBe(61.0)
+        ->and($stay['alternatives']->pluck('id'))->toContain($full->id);
+    $response->assertSee($full->name.' is full that night');
+});
+
+test('without a date or with a past date the planner asks nothing from Agoda', function () {
+    hotelNear($this->yogya, 1, 4, ['external_id' => '11']);
+    Illuminate\Support\Facades\Http::fake();
+
+    $this->get('/trip-planner?start=yogyakarta&days=2')->assertOk()->assertDontSee('Hotels: about');
+    $this->get('/trip-planner?start=yogyakarta&days=2&date=2020-01-01')
+        ->assertOk()
+        ->assertSee('That date has passed')
+        ->assertDontSee('that night, excl. taxes');
+    $this->get('/trip-planner?start=yogyakarta&days=2&date=nonsense')->assertOk();
+
+    Illuminate\Support\Facades\Http::assertNothingSent();
+});
+
+test('the date is kept in the planner links', function () {
+    placeNearYogya('Temple Near', 10, ['heritage-history']);
+    fakeAgodaNights([]);
+    $date = today()->addDays(20)->toDateString();
+
+    $this->get("/trip-planner?start=yogyakarta&days=2&date={$date}&adults=3")
+        ->assertSee('value="'.$date.'"', false)
+        ->assertSee('date='.$date.'&amp;adults=3', false);    // "Not for me" keeps the date
 });
