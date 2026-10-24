@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\PlaceController;
 use App\Http\Controllers\Admin\ResourceController;
 use App\Http\Controllers\AffiliateRedirectController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('home.about');
+Route::get('/contact', [ContactController::class, 'show'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,10')->name('contact.store');
 Route::get('/privacy-policy', [LegalController::class, 'privacy'])->name('privacy');
 Route::get('/affiliate-disclosure', [LegalController::class, 'affiliateDisclosure'])->name('affiliate-disclosure');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');

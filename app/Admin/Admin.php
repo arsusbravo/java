@@ -2,12 +2,11 @@
 
 namespace App\Admin;
 
-use App\Admin\Resources;
 use App\Models;
 
 class Admin
 {
-    /** @var array<class-string<Resource>> */
+    /** @var array<class-string<resource>> */
     public const RESOURCES = [
         Resources\ArticleResource::class,
         Resources\TagResource::class,
@@ -21,6 +20,7 @@ class Admin
         Resources\AffiliateNetworkResource::class,
         Resources\ImageResource::class,
         Resources\AffiliateClickResource::class,
+        Resources\ContactMessageResource::class,
         Resources\UserResource::class,
     ];
 
@@ -57,7 +57,7 @@ class Admin
     public static function navigation(): array
     {
         return collect(self::RESOURCES)
-            ->map(fn ($class) => (new $class)->meta() + ['href' => '/admin/' . $class::$key])
+            ->map(fn ($class) => (new $class)->meta() + ['href' => '/admin/'.$class::$key])
             ->groupBy('group')
             ->map(fn ($items, $group) => ['label' => $group, 'items' => $items->values()->all()])
             ->values()

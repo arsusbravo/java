@@ -4,6 +4,7 @@ use App\Admin\Admin;
 use App\Models\Accommodation;
 use App\Models\AffiliateClick;
 use App\Models\Article;
+use App\Models\ContactMessage;
 use App\Models\Destination;
 use App\Models\Image;
 use App\Models\Restaurant;
@@ -32,6 +33,7 @@ beforeEach(function () {
     Tag::create(['name' => 'Sunrise', 'slug' => 'sunrise']);
     Image::create(['imageable_type' => Destination::class, 'imageable_id' => $destination->id, 'path' => 'images/sunrise.png']);
     AffiliateClick::create(['clickable_type' => Tour::class, 'clickable_id' => $tour->id, 'ip_address' => '127.0.0.1', 'clicked_at' => now()]);
+    ContactMessage::create(['name' => 'Ayu', 'email' => 'ayu@example.com', 'message' => 'Is Bromo open in March?']);
     Review::create(['reviewable_type' => Tour::class, 'reviewable_id' => $tour->id, 'user_name' => 'Ayu', 'user_email' => 'ayu@example.com', 'rating' => 5, 'status' => 'approved']);
 });
 
@@ -65,9 +67,13 @@ test('every editable resource has working create and edit forms', function (stri
         return;
     }
 
-    $this->get("/admin/{$key}/create")
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('Admin/Resources/Form')->where('record', null));
+    if ($resource::$creatable) {
+        $this->get("/admin/{$key}/create")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Admin/Resources/Form')->where('record', null));
+    } else {
+        $this->get("/admin/{$key}/create")->assertNotFound();
+    }
 
     $record = $resource::$model::firstOrFail();
     $this->get("/admin/{$key}/{$record->id}/edit")

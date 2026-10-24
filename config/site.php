@@ -6,7 +6,6 @@
  */
 return [
     'owner' => env('SITE_OWNER', 'JavaSunrise'),
-    'email' => env('SITE_EMAIL', 'hello@javasunrise.com'),
     'phone' => env('SITE_PHONE'),
     'address' => env('SITE_ADDRESS'),
 

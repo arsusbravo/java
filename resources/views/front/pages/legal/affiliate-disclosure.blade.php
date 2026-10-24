@@ -33,9 +33,7 @@
 
 <h2>Questions</h2>
 <p>
-    @if(config('site.email'))
-        Email us at <a href="mailto:{{ config('site.email') }}">{{ config('site.email') }}</a>.
-    @endif
+    Send us a message through our <a href="{{ route('contact') }}">contact form</a>.
     How we handle data when you click a booking link is explained in our <a href="{{ route('privacy') }}">privacy policy</a>.
 </p>
 @endsection

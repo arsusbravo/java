@@ -38,6 +38,7 @@
                     <li><a href="{{ route('trip-planner') }}" class="text-white/80 hover:text-java-accent transition-colors duration-300">Trip Planner</a></li>
                     <li><a href="{{ route('articles.index') }}" class="text-white/80 hover:text-java-accent transition-colors duration-300">Travel Articles</a></li>
                     <li><a href="{{ route('home.about') }}" class="text-white/80 hover:text-java-accent transition-colors duration-300">About Us</a></li>
+                    <li><a href="{{ route('contact') }}" class="text-white/80 hover:text-java-accent transition-colors duration-300">Contact</a></li>
                 </ul>
             </div>
 
@@ -64,14 +65,12 @@
                         </svg>
                         <span>{{ config('site.address') ?: 'Java Island, Indonesia' }}</span>
                     </li>
-                    @if(config('site.email'))
                     <li class="flex items-start gap-3">
                         <svg class="w-5 h-5 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                         </svg>
-                        <a href="mailto:{{ config('site.email') }}" class="hover:text-java-accent">{{ config('site.email') }}</a>
+                        <a href="{{ route('contact') }}" class="hover:text-java-accent">Send us a message</a>
                     </li>
-                    @endif
                     @if(config('site.phone'))
                     <li class="flex items-start gap-3">
                         <svg class="w-5 h-5 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

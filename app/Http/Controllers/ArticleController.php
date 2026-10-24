@@ -45,7 +45,7 @@ class ArticleController extends Controller
             'ctaTitle' => 'Share Your Java Story',
             'ctaDescription' => 'Have an amazing Java experience to share? We\'d love to feature your story on our platform',
             'ctaButton' => 'Submit Your Story',
-            'ctaLink' => route('home.about').'#contact',
+            'ctaLink' => route('contact'),
         ];
 
         return view('front.pages.articles', array_merge(compact('articles', 'featuredArticles', 'destinations'), $pageData));
@@ -82,7 +82,7 @@ class ArticleController extends Controller
             'ctaTitle' => 'Need a Custom Itinerary?',
             'ctaDescription' => 'Let us help you plan the perfect Java adventure tailored to your interests and schedule',
             'ctaButton' => 'Contact Us',
-            'ctaLink' => route('home.about').'#contact',
+            'ctaLink' => route('contact'),
         ];
 
         // Real counts for the hero; zeros are left out

@@ -77,7 +77,8 @@ test('the privacy policy and affiliate disclosure describe what the site really 
         ->assertSee('shortened IP address')
         ->assertSee('Google Fonts')
         ->assertSee('Agoda')
-        ->assertSee('mailto:'.config('site.email'), false);
+        ->assertSee(route('contact'), false)
+        ->assertDontSee('mailto:', false);
 
     $this->get('/affiliate-disclosure')
         ->assertOk()

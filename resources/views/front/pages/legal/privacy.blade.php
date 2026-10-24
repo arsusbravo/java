@@ -14,9 +14,7 @@
 <h2>Who is responsible</h2>
 <p>
     This website is run by {{ config('site.owner') }}@if(config('site.address')), {{ config('site.address') }}@endif.
-    @if(config('site.email'))
-        For any privacy question or request, email <a href="mailto:{{ config('site.email') }}">{{ config('site.email') }}</a>.
-    @endif
+    For any privacy question or request, use our <a href="{{ route('contact') }}">contact form</a>.
 </p>
 
 <h2>What we collect and why</h2>
@@ -44,8 +42,12 @@
     The legal basis is our legitimate interest in knowing which content is useful (Article 6(1)(f) GDPR).
 </p>
 
-<h3>Emails you send us</h3>
-<p>If you email us, we use your address and message only to reply, and delete them when they are no longer needed.</p>
+<h3>Messages you send us</h3>
+<p>
+    If you use our <a href="{{ route('contact') }}">contact form</a>, we store your name, email address and message
+    so we can read and answer it. We use them only to reply to you, and delete them when they are no longer needed.
+    The form is protected against spam by limiting how many messages can be sent in a short time.
+</p>
 
 <h3>Server logs</h3>
 <p>
@@ -79,9 +81,7 @@
 <p>
     Under the GDPR you can ask us to see, correct or delete your personal data, to limit how we use it,
     or object to its use.
-    @if(config('site.email'))
-        Email <a href="mailto:{{ config('site.email') }}">{{ config('site.email') }}</a> and we will reply within one month.
-    @endif
+    Send your request through our <a href="{{ route('contact') }}">contact form</a> and we will reply within one month.
     You also have the right to complain to the data protection authority in your country.
 </p>
 
