@@ -49,8 +49,7 @@ test('a restaurant has its own page with everything a visitor needs', function (
         ->assertSeeInOrder(['Home', $this->jakarta->region->name, 'Jakarta', 'Café Batavia']);
 
     // Structured data for search engines
-    preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $response->getContent(), $json);
-    $data = json_decode($json[1], true);
+    $data = ldOfType($response->getContent(), 'Restaurant');
     expect($data['@type'])->toBe('Restaurant')
         ->and($data['servesCuisine'])->toBe(['Indonesian', 'European'])
         ->and($data['priceRange'])->toBe('$$$$')
@@ -66,8 +65,7 @@ test('approved reviews are shown and feed the rating', function () {
         ->assertSee('Wonderful oxtail soup.')
         ->assertDontSee('Buy pills');
 
-    preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $response->getContent(), $json);
-    expect(json_decode($json[1], true)['aggregateRating']['reviewCount'])->toBe(1);
+    expect(ldOfType($response->getContent(), 'Restaurant')['aggregateRating']['reviewCount'])->toBe(1);
 });
 
 test('only published, active restaurants have a page, and visits are counted', function () {

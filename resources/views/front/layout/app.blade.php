@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Java Sunrise - Discover the Beauty of Java Island')</title>
-    <meta name="description" content="@yield('meta_description', 'Discover Java Island: travel guides, destinations, hotels, tours and local food across West, Central and East Java.')">
+    @include('front.layout.seo')
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">

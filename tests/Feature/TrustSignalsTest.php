@@ -111,7 +111,7 @@ test('the sitemap lists every public page and nothing private', function () {
         ->assertHeader('Content-Type', 'application/xml; charset=UTF-8');
 
     $xml = simplexml_load_string($response->getContent());
-    $urls = collect($xml->xpath("//*[local-name()='loc']"))->map(fn ($loc) => (string) $loc);
+    $urls = collect($xml->xpath("//*[local-name()='url']/*[local-name()='loc']"))->map(fn ($loc) => (string) $loc);
 
     expect($urls)->toContain(route('home'), route('trip-planner'), route('privacy'), route('affiliate-disclosure'))
         ->toContain(route('destinations.region', $place->region->slug))

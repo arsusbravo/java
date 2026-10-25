@@ -46,3 +46,15 @@ function something()
 {
     // ..
 }
+
+/**
+ * The page's JSON-LD block of the given schema.org type.
+ *
+ * @return array<string, mixed>|null
+ */
+function ldOfType(string $html, string $type): ?array
+{
+    preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $html, $matches);
+
+    return collect($matches[1])->map(fn ($json) => json_decode($json, true))->firstWhere('@type', $type);
+}

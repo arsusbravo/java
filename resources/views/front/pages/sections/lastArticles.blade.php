@@ -29,7 +29,7 @@
                     <a href="{{ $featuredArticle->url() }}" class="block">
                         <div class="relative overflow-hidden h-96">
                             <img src="{{ image_url($featuredArticle->featured_image, 'article') }}" 
-                                 alt="{{ $featuredArticle->title }}" 
+                                 alt="{{ $featuredArticle->featured_image_alt }}" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                             <span class="absolute top-6 left-6 px-4 py-2 bg-java-accent text-white rounded-full text-sm font-semibold uppercase">
                                 {{ $featuredArticle->article_type }}
@@ -74,7 +74,7 @@
                     <a href="{{ $article->url() }}" class="flex gap-4 p-6">
                         <div class="w-24 h-24 shrink-0 rounded-xl overflow-hidden">
                             <img src="{{ image_url($article->featured_image, 'article') }}" 
-                                 alt="{{ $article->title }}" 
+                                 alt="{{ $article->featured_image_alt }}" 
                                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         </div>
                         <div class="flex-1">

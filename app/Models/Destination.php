@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasFeaturedImage;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Support\Geo;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -19,6 +19,7 @@ class Destination extends Model
         'slug',
         'description',
         'featured_image',
+        'image_alt',
         'latitude',
         'longitude',
         'best_time_to_visit',
@@ -52,7 +53,7 @@ class Destination extends Model
         return $this->belongsToMany(DestinationType::class)->orderBy('sort_order');
     }
 
-        public function images()
+    public function images()
     {
         return $this->morphMany(Image::class, 'imageable');
     }

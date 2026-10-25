@@ -1,10 +1,14 @@
 @extends('front.layout.app')
 
+@section('title', $pageTitle)
+@section('meta_description', $heroDescription)
+@section('og_image', is_file(public_path('images/'.$heroImage)) ? asset('images/'.$heroImage) : '')
+
 @section('hero')
 <!-- Hero Section with Parallax Effect -->
 <section class="hero-parallax relative h-screen flex items-center justify-center overflow-hidden">
     <div class="parallax-bg absolute inset-0">
-        <img src="{{ image_url('images/' . $heroImage, 'hero') }}" alt="{{ $heroTitle }}" class="w-full h-full object-cover scale-110">
+        <img src="{{ image_url('images/' . $heroImage, 'hero') }}" alt="{{ strip_tags(str_replace('<br>', ' ', $heroTitle)) }}" class="w-full h-full object-cover scale-110">
     </div>
     <div class="absolute inset-0 bg-linear-to-b from-black/65 via-black/55 to-black/75"></div>
     
@@ -139,7 +143,7 @@
                                 <div class="relative overflow-hidden aspect-[4/3]">
                                     @if($article->featured_image)
                                         <img src="{{ image_url($article->featured_image, 'article') }}" 
-                                             alt="{{ $article->title }}" 
+                                             alt="{{ $article->featured_image_alt }}" 
                                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                                     @else
                                         <div class="w-full h-full bg-linear-to-br from-java-primary to-java-accent"></div>
@@ -274,7 +278,7 @@
                                         @if($featured->featured_image)
                                             <div class="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
                                                 <img src="{{ image_url($featured->featured_image, 'article') }}" 
-                                                     alt="{{ $featured->title }}" 
+                                                     alt="{{ $featured->featured_image_alt }}" 
                                                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                                             </div>
                                         @endif

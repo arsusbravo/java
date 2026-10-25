@@ -36,6 +36,7 @@ class ArticleController extends Controller
         // Page-specific variables
         $pageData = [
             'pageType' => 'articles',
+            'pageTitle' => 'Java Travel Stories & Articles | Java Sunrise',
             'heroImage' => 'articles-hero.jpg',
             'heroBadge' => '📝 Travel Stories & Insights',
             'heroTitle' => 'Discover Amazing<br><span class="text-java-accent">Travel Stories</span>',
@@ -72,6 +73,7 @@ class ArticleController extends Controller
         // Page-specific variables
         $pageData = [
             'pageType' => 'plan',
+            'pageTitle' => 'Plan Your Java Trip: Itineraries & Travel Tips | Java Sunrise',
             'heroImage' => 'plan-trip-hero.png',
             'heroBadge' => '🗺️ Travel Planning Made Easy',
             'heroTitle' => 'Plan Your Perfect<br><span class="text-java-accent">Java Adventure</span>',
@@ -116,6 +118,7 @@ class ArticleController extends Controller
         // Page-specific variables
         $pageData = [
             'pageType' => 'guides',
+            'pageTitle' => 'Java Travel Guides | Java Sunrise',
             'heroImage' => 'guides-hero.jpg',
             'heroBadge' => '📚 Expert Travel Guides',
             'heroTitle' => 'Your Complete<br><span class="text-java-accent">Java Travel Guide</span>',

@@ -1,5 +1,25 @@
 @extends('front.layout.app')
 
+@section('title', 'Java Sunrise – Java Travel Guide, Hotels & Trip Planner')
+@section('meta_description', 'Plan your trip to Java, Indonesia: travel guides to Borobudur, Bromo, Yogyakarta and more, hotels near every sight with live prices, and a free day-by-day trip planner.')
+
+@push('structured_data')
+    {{ json_ld([
+        '@type' => 'WebSite',
+        'name' => 'Java Sunrise',
+        'alternateName' => 'JavaSunrise.com',
+        'url' => route('home'),
+        'inLanguage' => 'en',
+    ]) }}
+    {{ json_ld([
+        '@type' => 'Organization',
+        'name' => 'Java Sunrise',
+        'url' => route('home'),
+        'logo' => asset('images/logo-lg.png'),
+        'sameAs' => array_values(array_filter(config('site.social'))),
+    ]) }}
+@endpush
+
 @section('hero')
 <!-- Hero Section with Parallax Effect -->
 <section class="hero-parallax relative h-screen flex items-center justify-center overflow-hidden" id="home">

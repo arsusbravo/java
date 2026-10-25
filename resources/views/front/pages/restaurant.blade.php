@@ -8,6 +8,18 @@
 
 @section('title', $pageTitle)
 @section('meta_description', $restaurant->meta_description ?: \App\Support\Seo::description($restaurant->description))
+@section('og_image', $restaurant->featured_image_url)
+
+@push('structured_data')
+    {{ breadcrumb_ld(array_filter([
+        'Home' => route('home'),
+        ...($area ? [
+            $area->region->name => route('destinations.region', $area->region->slug),
+            $area->name => route('destinations.show', [$area->region->slug, $area->slug]),
+        ] : []),
+        $restaurant->name => $restaurant->url(),
+    ])) }}
+@endpush
 
 @section('content')
 {{-- Structured data, so search engines can show it as a restaurant --}}
@@ -81,7 +93,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                         @foreach($restaurant->images as $image)
                             <a href="{{ image_url($image->path) }}" data-lightbox="restaurant" data-caption="{{ $image->title }}" target="_blank" rel="noopener" class="group block aspect-[4/3] cursor-zoom-in overflow-hidden rounded-lg">
-                                <img src="{{ image_url($image->path) }}" alt="{{ $image->alt_text ?: $restaurant->name }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                <img src="{{ image_url($image->path) }}" alt="{{ $image->alt_text ?: $restaurant->name.($area ? ' near '.$area->name : '').' – photo '.$loop->iteration }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
                             </a>
                         @endforeach
                     </div>

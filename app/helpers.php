@@ -106,3 +106,44 @@ if (! function_exists('booking_url')) {
         return route('go', [$type, $listing->getKey(), 'from' => $from, ...($stay?->query() ?? [])]);
     }
 }
+
+if (! function_exists('json_ld')) {
+    /**
+     * A schema.org JSON-LD script tag. Empty values are left out.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    function json_ld(array $data): \Illuminate\Support\HtmlString
+    {
+        $clean = function (array $value) use (&$clean): array {
+            return array_filter(
+                array_map(fn ($item) => is_array($item) ? $clean($item) : $item, $value),
+                fn ($item) => $item !== null && $item !== '' && $item !== [],
+            );
+        };
+
+        $json = json_encode(['@context' => 'https://schema.org', ...$clean($data)], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+
+        return new \Illuminate\Support\HtmlString('<script type="application/ld+json">'.$json.'</script>');
+    }
+}
+
+if (! function_exists('breadcrumb_ld')) {
+    /**
+     * BreadcrumbList for the trail shown on the page: ['Home' => url, ..., 'This page' => url].
+     *
+     * @param  array<string, string>  $crumbs
+     */
+    function breadcrumb_ld(array $crumbs): \Illuminate\Support\HtmlString
+    {
+        return json_ld([
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => collect($crumbs)->keys()->map(fn ($name, $index) => [
+                '@type' => 'ListItem',
+                'position' => $index + 1,
+                'name' => (string) $name,
+                'item' => $crumbs[$name],
+            ])->all(),
+        ]);
+    }
+}

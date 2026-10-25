@@ -47,6 +47,9 @@ class DestinationResource extends Resource
             Field::decimal('latitude')->rules(['between:-90,90']),
             Field::decimal('longitude')->rules(['between:-180,180']),
             Field::image('featured_image'),
+            Field::text('image_alt', 'Image description (alt text)')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->help('What the photo shows, for Google Images and blind visitors. Example: "Stupas of Borobudur Temple at sunrise". Empty uses the name.'),
             Field::gallery(),
             Field::text('meta_title', 'Meta Title')->wide(),
             Field::textarea('meta_description', 'Meta Description'),

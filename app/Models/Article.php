@@ -19,6 +19,7 @@ class Article extends Model
         'content',
         'excerpt',
         'featured_image',
+        'image_alt',
         'article_type',
         'is_featured',
         'status',

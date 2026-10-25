@@ -1,11 +1,33 @@
 @extends('front.layout.app')
 
-@section('title', $destination->name . ' - ' . $destination->region->name)
+@section('title', $destination->meta_title ?: \App\Support\Seo::title("{$destination->name}, {$destination->region->name}"))
 @section('meta_description', $destination->meta_description ?: \App\Support\Seo::description($destination->description))
+@section('og_image', $destination->featured_image_url)
+
+@push('structured_data')
+    {{ json_ld([
+        '@type' => 'TouristAttraction',
+        'name' => $destination->name,
+        'description' => \App\Support\Seo::description($destination->description),
+        'url' => route('destinations.show', [$destination->region->slug, $destination->slug]),
+        'image' => str_ends_with($destination->featured_image_url, '.svg') ? null : $destination->featured_image_url,
+        'geo' => $destination->latitude !== null ? ['@type' => 'GeoCoordinates', 'latitude' => (float) $destination->latitude, 'longitude' => (float) $destination->longitude] : null,
+        'address' => ['@type' => 'PostalAddress', 'addressRegion' => $destination->region->name, 'addressCountry' => 'ID'],
+        'containedInPlace' => ['@type' => 'AdministrativeArea', 'name' => $destination->region->name],
+        'touristType' => $destination->types->pluck('name')->values()->all(),
+    ]) }}
+    {{ breadcrumb_ld([
+        'Home' => route('home'),
+        'Destinations' => route('destinations.index'),
+        $destination->region->name => route('destinations.region', $destination->region->slug),
+        $destination->name => route('destinations.show', [$destination->region->slug, $destination->slug]),
+    ]) }}
+@endpush
 
 @section('content')
 <!-- Hero Section -->
-<div class="relative h-96 bg-cover bg-center" style="background-image: url('{{ $destination->featured_image_url }}');">
+<div class="relative h-96 overflow-hidden">
+    <img src="{{ $destination->featured_image_url }}" alt="{{ $destination->featured_image_alt }}" fetchpriority="high" class="absolute inset-0 h-full w-full object-cover">
     <div class="absolute inset-0 bg-black/50"></div>
     <div class="relative container mx-auto px-4 h-full flex items-center">
         <div class="text-white">

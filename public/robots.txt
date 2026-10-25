@@ -1,5 +1,8 @@
 User-agent: *
 Disallow: /go/
 Disallow: /admin/
+Disallow: /dashboard
+Disallow: /login
+Disallow: /settings/
 
 Sitemap: https://javasunrise.com/sitemap.xml

@@ -31,10 +31,29 @@
             ->implode("\n\n");
     }
     $isLong = Str::length(strip_tags((string) $description)) > 700;
+
+    // Feed photos only carry the hotel name as alt text: describe them by type and place instead
+    $near = $area ? " near {$area->name}" : '';
+    $photoAlt = fn ($image, int $number): string => filled($image->alt_text) && $image->alt_text !== $hotel->name
+        ? $image->alt_text
+        : ($number === 1 ? "{$hotel->name}, {$kind}{$near}" : "{$hotel->name}{$near} – photo {$number}");
 @endphp
 
 @section('title', $pageTitle)
 @section('meta_description', $metaDescription)
+@section('og_image', $photos->isNotEmpty() ? image_url($photos->first()->path) : '')
+
+@push('structured_data')
+    {{ breadcrumb_ld(array_filter([
+        'Home' => route('home'),
+        ...($area ? [
+            $area->region->name => route('destinations.region', $area->region->slug),
+            $area->name => route('destinations.show', [$area->region->slug, $area->slug]),
+            'Hotels near '.$area->name => route('destinations.hotels', [$area->region->slug, $area->slug]),
+        ] : []),
+        $hotel->name => $hotel->url(),
+    ])) }}
+@endpush
 
 @section('content')
 {{-- Structured data for search engines (no ratings: they are Agoda's, not ours) --}}
@@ -109,7 +128,7 @@
             @foreach($photos->take(5) as $image)
                 <a href="{{ image_url($image->path) }}" data-lightbox="hotel" data-caption="{{ $image->title }}" target="_blank" rel="noopener"
                    class="{{ $loop->first ? 'md:col-span-2 md:row-span-2 h-64 md:h-auto' : 'hidden md:block' }} group block cursor-zoom-in overflow-hidden bg-gray-100">
-                    <img src="{{ image_url($image->path) }}" alt="{{ $image->alt_text ?: $hotel->name }}" @unless($loop->first) loading="lazy" @endunless
+                    <img src="{{ image_url($image->path) }}" alt="{{ $photoAlt($image, $loop->iteration) }}" @unless($loop->first) loading="lazy" @endunless
                          class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
                 </a>
             @endforeach
@@ -123,7 +142,7 @@
             {{-- The other photos, for the lightbox --}}
             <div hidden>
                 @foreach($photos->skip(5) as $image)
-                    <a href="{{ image_url($image->path) }}" data-lightbox="hotel" data-caption="{{ $image->title }}"><img src="" alt="{{ $image->alt_text ?: $hotel->name }}"></a>
+                    <a href="{{ image_url($image->path) }}" data-lightbox="hotel" data-caption="{{ $image->title }}"><img src="" alt="{{ $photoAlt($image, $loop->iteration + 5) }}"></a>
                 @endforeach
             </div>
         </div>

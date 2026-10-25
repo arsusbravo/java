@@ -1,6 +1,15 @@
 @extends('front.layout.app')
 
 @section('title', "Hotels near {$destination->name}, {$destination->region->name} | Java Sunrise")
+@section('og_image', $destination->featured_image_url)
+@push('structured_data')
+    {{ breadcrumb_ld([
+        'Home' => route('home'),
+        $destination->region->name => route('destinations.region', $destination->region->slug),
+        $destination->name => route('destinations.show', [$destination->region->slug, $destination->slug]),
+        'Hotels' => route('destinations.hotels', [$destination->region->slug, $destination->slug]),
+    ]) }}
+@endpush
 @section('meta_description', "Compare " . ($hotels->total() ?: 'the') . " hotels, resorts and guesthouses near {$destination->name}, sorted by distance, with star ratings and prices from our booking partners.")
 
 @php

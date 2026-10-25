@@ -1,5 +1,9 @@
 @extends('front.layout.app')
 
+@section('title', 'About JavaSunrise: an independent travel guide to Java | Java Sunrise')
+@section('meta_description', 'JavaSunrise is a travel guide to Java Island, Indonesia: destinations, travel tips, places to stay and local food across West, Central and East Java.')
+@section('og_image', asset('images/about-hero.jpeg'))
+
 @section('hero')
 <!-- About Hero Section -->
 <section class="hero-parallax relative h-[70vh] flex items-center justify-center overflow-hidden">

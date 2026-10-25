@@ -29,4 +29,20 @@ trait HasFeaturedImage
 
         return image_url($image?->path, $placeholder);
     }
+
+    /**
+     * Alt text for the main photo: the written description (`image_alt`) when
+     * there is one, else the featured Image's alt text, else the name or title.
+     */
+    public function getFeaturedImageAltAttribute(): string
+    {
+        if (filled($this->getAttribute('image_alt'))) {
+            return $this->image_alt;
+        }
+
+        $images = $this->relationLoaded('images') ? $this->images : null;
+        $image = $images?->firstWhere('is_featured', true) ?? $images?->sortBy('order')->first();
+
+        return $image?->alt_text ?: (string) ($this->getAttribute('name') ?? $this->getAttribute('title') ?? '');
+    }
 }

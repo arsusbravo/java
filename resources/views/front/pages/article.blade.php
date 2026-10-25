@@ -1,12 +1,33 @@
 @extends('front.layout.app')
 
+@section('title', $article->meta_title ?: $article->title.' | Java Sunrise')
+@section('meta_description', $article->meta_description ?: \App\Support\Seo::description($article->excerpt ?: $article->content))
+@section('og_type', 'article')
+@section('og_image', $article->featured_image_url)
+
+@push('structured_data')
+    {{ json_ld([
+        '@type' => $article->article_type === 'news' ? 'NewsArticle' : 'BlogPosting',
+        'headline' => \Illuminate\Support\Str::limit($article->title, 110, ''),
+        'description' => \App\Support\Seo::description($article->excerpt ?: $article->content),
+        'image' => str_ends_with($article->featured_image_url, '.svg') ? null : [$article->featured_image_url],
+        'datePublished' => $article->published_at?->toAtomString(),
+        'dateModified' => $article->updated_at?->toAtomString(),
+        'author' => $article->author ? ['@type' => 'Person', 'name' => $article->author->name] : ['@type' => 'Organization', 'name' => 'Java Sunrise'],
+        'publisher' => ['@type' => 'Organization', 'name' => 'Java Sunrise', 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/logo-lg.png')]],
+        'mainEntityOfPage' => $article->url(),
+        'about' => $article->destinations->map(fn ($place) => ['@type' => 'Place', 'name' => $place->name])->values()->all(),
+    ]) }}
+    {{ breadcrumb_ld(['Home' => route('home'), 'Articles' => route('articles.index'), $article->title => $article->url()]) }}
+@endpush
+
 @section('hero')
 <!-- Article Hero Section -->
 <section class="hero-parallax relative h-[70vh] lg:h-screen flex items-end overflow-hidden">
     <div class="parallax-bg absolute inset-0">
         @if($article->featured_image)
             <img src="{{ image_url($article->featured_image, 'hero') }}" 
-                 alt="{{ $article->title }}" 
+                 alt="{{ $article->featured_image_alt }}" 
                  class="w-full h-full object-cover scale-110">
         @else
             <div class="w-full h-full bg-linear-to-br from-java-primary to-java-accent"></div>
@@ -244,7 +265,7 @@
                                     @if($latest->featured_image)
                                     <div class="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden">
                                         <img src="{{ image_url($latest->featured_image, 'article') }}" 
-                                             alt="{{ $latest->title }}" 
+                                             alt="{{ $latest->featured_image_alt }}" 
                                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                                     </div>
                                     @endif
@@ -306,7 +327,7 @@
                 <div class="relative overflow-hidden aspect-[4/3]">
                     @if($related->featured_image)
                         <img src="{{ image_url($related->featured_image, 'article') }}" 
-                             alt="{{ $related->title }}" 
+                             alt="{{ $related->featured_image_alt }}" 
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                     @else
                         <div class="w-full h-full bg-linear-to-br from-java-primary to-java-accent"></div>

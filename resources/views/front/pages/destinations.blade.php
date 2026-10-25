@@ -1,6 +1,6 @@
 @extends('front.layout.app')
 
-@section('title', 'Explore Java Destinations - West, Central & East Java')
+@section('title', 'Java Destinations: West, Central & East Java | Java Sunrise')
 
 @section('hero')
 <!-- Hero Section -->
@@ -143,7 +143,7 @@
             <div class="scroll-animate opacity-0">
                 <a href="{{ route('destinations.show', [$destination->region->slug, $destination->slug]) }}" class="destination-card group relative overflow-hidden rounded-3xl h-[400px] cursor-pointer block">
                     <img src="{{ image_url($destination->featured_image, 'destination') }}" 
-                         alt="{{ $destination->name }}" 
+                         alt="{{ $destination->featured_image_alt }}" 
                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                     <div class="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
                     <div class="absolute inset-0 p-6 flex flex-col justify-end">
@@ -223,7 +223,7 @@
                     <a href="{{ route('destinations.show', [$region->slug, $destination->slug]) }}" class="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
                         <div class="relative h-48 overflow-hidden">
                             <img src="{{ image_url($destination->featured_image, 'destination') }}" 
-                                 alt="{{ $destination->name }}" 
+                                 alt="{{ $destination->featured_image_alt }}" 
                                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                             @if($destination->is_featured)
                             <span class="absolute top-3 right-3 px-3 py-1 bg-java-accent text-white rounded-full text-xs font-semibold">

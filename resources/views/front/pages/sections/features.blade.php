@@ -20,7 +20,7 @@
             <div class="md:col-span-8 md:row-span-2 scroll-animate opacity-0">
                 <a href="{{ route('destinations.show', [$firstDestination->region->slug, $firstDestination->slug]) }}" class="destination-card group relative overflow-hidden rounded-3xl h-full min-h-[600px] cursor-pointer block">
                     <img src="{{ image_url($firstDestination->featured_image, 'destination') }}" 
-                         alt="{{ $firstDestination->name }}" 
+                         alt="{{ $firstDestination->featured_image_alt }}" 
                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                     <div class="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
                     <div class="absolute inset-0 p-8 flex flex-col justify-end">
@@ -54,7 +54,7 @@
             <div class="md:col-span-4 scroll-animate opacity-0">
                 <a href="{{ route('destinations.show', [$destination->region->slug, $destination->slug]) }}" class="destination-card group relative overflow-hidden rounded-3xl h-full min-h-[290px] cursor-pointer block">
                     <img src="{{ image_url($destination->featured_image, 'destination') }}" 
-                         alt="{{ $destination->name }}" 
+                         alt="{{ $destination->featured_image_alt }}" 
                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                     <div class="absolute inset-0 bg-linear-to-t from-black/90 to-transparent"></div>
                     <div class="absolute inset-0 p-6 flex flex-col justify-end">

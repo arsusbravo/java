@@ -53,8 +53,7 @@ test('a hotel has its own page with photos, facts, rating and location', functio
     // Long feed text is split into paragraphs
     $response->assertSee('<p>A colonial-era hotel. It has a pool. Rooms are large.</p>', false);
 
-    preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $response->getContent(), $json);
-    $data = json_decode($json[1], true);
+    $data = ldOfType($response->getContent(), 'Hotel');
     expect($data['@type'])->toBe('Hotel')
         ->and($data['starRating']['ratingValue'])->toBe(4)
         ->and($data['checkinTime'])->toBe('14:00')

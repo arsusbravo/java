@@ -37,12 +37,15 @@ class ArticleResource extends Resource
             Field::select('article_type', self::TYPES, 'Type')->required()->default('guide'),
             Field::select('status', Admin::STATUSES)->required()->default('draft'),
             Field::datetime('published_at', 'Publish Date')
-                ->help('In ' . config('app.timezone') . ' time. Articles are visible once published and this date has passed.'),
+                ->help('In '.config('app.timezone').' time. Articles are visible once published and this date has passed.'),
             Field::belongsTo('author_id', Models\User::class, 'Author')->default(auth()->id()),
             Field::boolean('is_featured', 'Featured'),
             Field::textarea('excerpt'),
             Field::html('content'),
             Field::image('featured_image'),
+            Field::text('image_alt', 'Image description (alt text)')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->help('What the photo shows, for Google Images and blind visitors. Example: "Stupas of Borobudur Temple at sunrise". Empty uses the name.'),
             Field::gallery(),
             Field::belongsToMany('destinations', Models\Destination::class),
             Field::belongsToMany('accommodations', Models\Accommodation::class),
